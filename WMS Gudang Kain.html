@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WMS Gudang Kain</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+<style>
+:root{--bg:#f2f3ef;--card:#fff;--ink:#16202e;--mute:#667085;--line:#dcdfd6;--acc:#1f4e79;--kraft:#b9803a;--ok:#2f7d4f;--warn:#a96a00;--bad:#b3261e;--okbg:#e2f1e7;--warnbg:#fbeccb;--badbg:#f9dcd9;--infobg:#dde8f3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12171f;--card:#1b222d;--ink:#e8ebf0;--mute:#9aa4b2;--line:#2c3644;--acc:#7fb2e5;--kraft:#d9a15a;--ok:#6fcf97;--warn:#f2c14e;--bad:#ff8a80;--okbg:#1d3a2a;--warnbg:#3d3213;--badbg:#42201d;--infobg:#1d3047;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12171f;--card:#1b222d;--ink:#e8ebf0;--mute:#9aa4b2;--line:#2c3644;--acc:#7fb2e5;--kraft:#d9a15a;--ok:#6fcf97;--warn:#f2c14e;--bad:#ff8a80;--okbg:#1d3a2a;--warnbg:#3d3213;--badbg:#42201d;--infobg:#1d3047;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif}
+header{background:var(--acc);color:#fff;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) header{color:#10202f}}
+header h1{font-size:18px;margin:0;font-weight:700;flex:1}
+button,.btn{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;padding:7px 12px}
+button.p{background:var(--kraft);border-color:var(--kraft);color:#fff;font-weight:600}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--kraft);outline-offset:1px}
+nav{display:flex;gap:2px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--line);padding:0 8px;position:sticky;top:0;z-index:5}
+nav button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:11px 12px;white-space:nowrap;color:var(--mute)}
+nav button.on{color:var(--ink);border-bottom-color:var(--kraft);font-weight:600}
+main{max-width:1150px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi b{display:block;font-size:22px;font-weight:700}.kpi span{color:var(--mute);font-size:12.5px}
+form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--mute)}
+input,select{font:inherit;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+.wide{grid-column:span 2}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{color:var(--mute);font-weight:600;font-size:12px;position:sticky;top:0;background:var(--card)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.tag{padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600}
+.OK{background:var(--okbg);color:var(--ok)}.W{background:var(--warnbg);color:var(--warn)}.B{background:var(--badbg);color:var(--bad)}.I{background:var(--infobg);color:var(--acc)}
+.hint{color:var(--mute);font-size:12.5px;margin:6px 0 0}
+#msg{min-height:20px;margin-top:8px;font-weight:600}
+.err{color:var(--bad)}.good{color:var(--ok)}
+.flow{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}.flow span{background:var(--infobg);color:var(--acc);padding:4px 10px;border-radius:6px;font-size:12.5px;font-weight:600}
+h2{font-size:16px;margin:0 0 10px}
+.blk h3{margin:0 0 8px;font-size:15px}.shelf{display:grid;gap:4px;overflow-x:auto;padding-bottom:4px}
+.rc{min-width:58px;border:1px solid var(--line);border-radius:5px;padding:5px 3px;text-align:center;font-size:11.5px;background:var(--bg);color:var(--ink);line-height:1.25}
+.rc b{display:block;font-size:13px}.rc.l1{background:var(--infobg)}.rc.l2{background:color-mix(in srgb,var(--acc) 28%,var(--card))}.rc.l3{background:color-mix(in srgb,var(--acc) 50%,var(--card))}.rc.l4{background:var(--acc);color:var(--card)}
+.rc.hit{outline:3px solid var(--kraft);outline-offset:1px}.rc.sel{box-shadow:0 0 0 2px var(--ink)}.ax{font-size:11.5px;color:var(--mute);text-align:center;align-self:center}
+.lg{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--mute)}.lg i{display:inline-block;width:16px;height:12px;border:1px solid var(--line);border-radius:3px;vertical-align:middle;margin-right:4px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.lbls{display:flex;flex-wrap:wrap;gap:8px}.lbl{width:6.5cm;border:1px solid #000;padding:6px;background:#fff;color:#000;text-align:center;font-size:11px;break-inside:avoid}.lbl b{display:block;font-size:15px}.lbl svg{width:100%;height:42px;display:block}
+@media print{header,nav,.noprint{display:none!important}body{background:#fff}main{padding:0;max-width:none}}
+body.pet header,body.pet nav{display:none}body.pet main{max-width:560px;padding:12px}
+body.pet input,body.pet select{font-size:18px;padding:12px}body.pet button{font-size:17px;padding:12px 14px}
+body.pet form{grid-template-columns:1fr}body.pet .wide{grid-column:auto}body.pet #f>label:first-child,body.pet [data-d]{display:none}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pgrid button{padding:20px 8px;font-weight:600;line-height:1.3;text-align:center}
+.ptop{display:flex;gap:8px;align-items:center;margin-bottom:12px}.ptop b{flex:1;text-align:center}
+.reg td,.reg th{white-space:normal;vertical-align:top;font-size:12.5px;padding:7px 5px}.reg td:nth-child(5){min-width:150px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--card);padding:10px 14px;border-radius:8px;z-index:70;max-width:90vw;font-weight:600}
+.ovl{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+.dlg{background:var(--card);color:var(--ink);padding:16px;border-radius:10px;max-width:420px;width:100%}.dlg p{margin:0}.dlg input{margin-top:10px}.dbt{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+body.pet [data-acc=batal]{display:none}
+.phg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:6px}.pv img{max-height:56px;margin-top:4px;border-radius:4px;display:block}
+.fgal{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fgal img{width:100%;border-radius:6px;border:1px solid var(--line)}.fgal figcaption{font-size:12px;color:var(--mute);margin-bottom:3px}.fgal figure{margin:0}
+#f.chk>label:has([name=cari]){order:-3}#f.chk>label:has([name=ord]){order:-2}#f.chk>label:has([name=k]),#f.chk>label:has([name=p]),#f.chk>label:has([name=y]){order:-1}#f.chk>label:first-child{order:1}#f.chk>button.p{order:2}
+</style>
+</head>
+<body>
+<header><h1>WMS Gudang Kain</h1><span id="sync" class="tag I">Memuat…</span>
+<label style="color:inherit;flex-direction:row;align-items:center;gap:6px">Impor Inventory Control (.xlsx)<input id="file" type="file" accept=".xlsx" style="width:200px"></label>
+<button id="mpet">Mode Petugas</button><button id="exp">Unduh Excel</button><button id="rst">Hapus data</button></header>
+<nav id="nav"></nav>
+<main id="v"></main>
+<datalist id="dl"></datalist><datalist id="dsj"></datalist><datalist id="dord"></datalist><datalist id="dpo"></datalist>
+<script>
+const KEY='wms_v2';
+let S={items:{},tx:[],seq:1},tab='DASH',q='',fs='',sel='',pq='',hq='',LB=[],MODE='adm',NAME='',PK='',RM='',RS='',fx=false,STARTED=false,AO='',PINH='',PINOK=false,ME={k:'',n:'',g:'MAB05',p:'',y:''},IMP={},MAN={},PBL='A,B,C,D',PB=8,PT=4,DB=null,CAN=true,pend=false,LAST={};
+const $=s=>document.querySelector(s);
+const nf=(v,d=0)=>(+v).toLocaleString('id-ID',{minimumFractionDigits:d,maximumFractionDigits:d});
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let TOL=0.01;const eq=(a,b)=>Math.abs(a-b)<=TOL+1e-9,tod=()=>new Date().toISOString().slice(0,10);
+function load(){try{PINH=localStorage.getItem('wms_pin')||''}catch(e){}try{NAME=localStorage.getItem('wms_name')||''}catch(e){}try{const t=localStorage.getItem('wms_tol');if(t!==null&&t!=='')TOL=+t}catch(e){}try{const r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}}
+function save(){if(DB)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){msg('Penyimpanan browser penuh atau diblokir. Unduh Excel sebagai cadangan.',1)}}
+function msg(t,bad){const m=$('#msg');if(m){m.textContent=t;m.className=bad?'err':'good'}}
+function setSync(t,c){const e=$('#sync');if(e){e.textContent=t;e.className='tag '+(c||'I')}}
+const rid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+async function put(rec){if(DB){await DB.collection('tx').doc(rid()).set(rec)}else{S.tx.push({...rec,id:S.seq++});save()}}
+async function delTx(id){if(DB){await DB.doc('tx/'+id).delete()}else{S.tx=S.tx.filter(t=>t.id!=id);save()}}
+function rr(){const a=document.activeElement;if(a&&a.closest&&a.closest('#f,.pf')&&a.value){pend=true;return}render()}
+document.addEventListener('focusout',()=>setTimeout(()=>{const a=document.activeElement;if(pend&&!(a&&a.closest&&a.closest('#f,.pf'))){pend=false;render()}},60));
+async function initDb(){
+ try{if(typeof claude==='undefined')throw 0;DB=await claude.use('db');const u=await claude.use('user');if(DB&&u&&(await u.can('data.write'))===false)CAN=false}catch(e){DB=null}
+ if(!DB){setSync('Mode lokal: data hanya di browser ini','W');return}
+ setSync(CAN?'Data bersama, tersambung':'Hanya baca','OK');
+ DB.collection('items').onSnapshot(sn=>{const it={};sn.docs.forEach(d=>(d.data().m||[]).forEach(r=>{it[r[0]]={n:r[1],g:r[2],p:r[3],y:r[4]}}));IMP=it;mergeItems()},e=>setSync('Gagal memuat item ('+e.code+')','B'));
+ DB.collection('master').onSnapshot(sn=>{const m={};sn.docs.forEach(d=>{const v=d.data();if(v&&v.k)m[v.k]={n:v.n,g:v.g,p:+v.p||0,y:+v.y||0}});MAN=m;mergeItems()},e=>setSync('Gagal memuat master ('+e.code+')','B'));
+ DB.collection('cfg').onSnapshot(sn=>{sn.docs.forEach(d=>{if(d.id=='main'&&d.data().tol!=null){TOL=+d.data().tol;rr()}if(d.id=='pin'){PINH=d.data().h||'';rr()}})},e=>{});
+ DB.collection('tx').onSnapshot(sn=>{S.tx=sn.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>(a.ts||0)-(b.ts||0));rr()},e=>setSync('Gagal memuat transaksi ('+e.code+')','B'))}
+const F=(k,l,r,x)=>({k,l,r,...x});
+const TABS={
+ SJ:{l:'1 Inbound (SJ)',f:[F('sj','No. surat jalan',1),F('pihak','Suppliers',1),F('desc','Description'),F('partai','No. Partai'),F('pl','Link packing list'),F('month','Month',0,{ro:1}),F('petugas','PIC team inbound')]},
+ TRM:{l:'2 Terima & cek SJ',f:[F('sj','No. surat jalan',1),F('desc','Description'),F('partai','No. Partai'),F('kondisi','Condition item',0,{o:['Baik','Rusak','Basah','Kotor','Cacat','Kurang','Lainnya']}),F('month','Month',0,{ro:1}),F('foto','Foto',0,{ph:1}),F('petugas','PIC team inbound')]},
+ RAK:{l:'3 Masuk rak',f:[F('sj','No. SJ (kosong = stok awal)'),F('rak','Kode rak',1,{rk:1}),F('nama','Nama barang',0,{ro:1}),F('petugas','Petugas')]},
+ PICK:{l:'4 Picker / order',f:[F('ord','No. order',1),F('po','No. PO'),F('pl','No. Packing list'),F('pihak','Customer'),F('rak','Diambil dari rak',1,{rk:1}),F('nama','Nama barang',0,{ro:1}),F('petugas','Picker')]},
+ CHK:{l:'5 Checker',f:[F('cari','Cari No. PO / No. Packing list',1),F('ord','No. order',1,{ro:1}),F('nama','Nama barang',0,{ro:1}),F('desain','Kode desain',1),F('warna','Warna',1),F('petugas','Checker')]},
+ MUAT:{l:'7 Muat',f:[F('ord','No. order',1),F('nama','Nama barang',0,{ro:1}),F('desain','Kode desain',1),F('warna','Warna',1),F('truk','No. kendaraan',1),F('petugas','Petugas muat')]},
+ MOV:{l:'\u21c4 Pindah rak',f:[F('dari','Dari rak',1,{rk:1}),F('rak','Ke rak',1,{rk:1}),F('petugas','Petugas')]}};
+const HELP={
+ SJ:'Catat isi surat jalan persis sesuai keterangan SJ: satu baris per item dengan Pcs dan Yard menurut SJ. Satu SJ boleh berisi banyak item. Link packing list cukup diisi sekali per SJ. Month terisi otomatis dari tanggal.',
+ TRM:'Catat barang yang benar-benar diterima per item. Pcs dan Yard tidak boleh melebihi isi SJ. SJ baru bisa diselesaikan bila semua item cocok. Isi kondisi barang saat diterima.',
+ RAK:'Hanya barang dari SJ yang sudah selesai yang bisa masuk rak. Isi Rack (mis. A-1) dan Detail rack (mis. 5), otomatis digabung menjadi A-1-5. Kosongkan No. SJ untuk menempatkan stok awal.',
+ PICK:'Picker mencatat barang yang diambil dari rak. Isi No. PO atau No. Packing list (salah satu cukup) agar order bisa dicari di Checker. Stok langsung terpotong sementara dan isi rak berkurang. Setelah semua item diambil, klik Selesaikan picking.',
+ CHK:'Cari No. PO atau No. Packing list, pilih dari daftar, lalu pilih item. Pcs dan Yard terisi otomatis sesuai hasil Picker dan tidak bisa diubah. Periksa nama barang, kode desain, dan warna (terisi saran dari kode barang, koreksi bila perlu).',
+ MUAT:'Hanya bisa untuk order yang sudah disetujui (pembayaran lunas dan pasti kirim). Periksa ulang dengan ketentuan yang sama dengan checker. Setelah tersimpan, stok rill terpotong.',
+ MOV:'Pindahkan barang antar rak. Pcs dan Yard tidak boleh melebihi isi rak asal. Total stok tidak berubah.'};
+const RE=/^([A-Z0-9]+)-([0-9]+)-([0-9]+)$/;
+function canon(r){r=(r||'').trim().toUpperCase().replace(/ /g,'');const m=RE.exec(r);return m?m[1]+'-'+String(+m[2]).padStart(2,'0')+'-'+(+m[3]):r}
+function sjData(){const J={};
+ for(const t of S.tx){const s=t.x&&t.x.sj,T=t.t;if(!s||!['SJ','TRM','RAK','SJC'].includes(T))continue;const j=J[s]??={sj:s,pihak:'',tgl:t.tgl,L:{},st:'BUKA',cat:''};
+  if(T=='SJC'){j.st=t.x.status;j.cat=t.x.cat||'';continue}
+  const l=j.L[t.k]??={sp:0,sy:0,rp:0,ry:0,pp:0,py:0};
+  if(T=='SJ'){j.pihak=t.x.pihak||j.pihak;l.sp+=t.p;l.sy+=t.y}else if(T=='TRM'){l.rp+=t.p;l.ry+=t.y}else{l.pp+=t.p;l.py+=t.y}}
+ return J}
+function ordData(){const O={};
+ for(const t of S.tx){const s=t.x&&t.x.ord;if(!s||!['PICK','CHK','MUAT','OST','ACC','ORDX'].includes(t.t))continue;const o=O[s]??={ord:s,pihak:'',tgl:t.tgl,L:{},closed:false};
+  if(t.t=='OST'){o.closed=true;continue}
+  if(t.t=='ORDX'){o.batal=true;o.bx=t.x;continue}
+  if(t.t=='ACC'){o.acc=t.x.status=='ACC';o.accx=t.x;continue}
+  const l=o.L[t.k]??={pk:[0,0],ck:[0,0],mu:[0,0],d:'',w:''};
+  if(t.t=='PICK'){o.pihak=t.x.pihak||o.pihak;o.po=t.x.po||o.po||'';o.pl=t.x.pl||o.pl||'';l.pk[0]+=t.p;l.pk[1]+=t.y}else if(t.t=='CHK'){l.ck[0]+=t.p;l.ck[1]+=t.y;l.d=t.x.desain;l.w=t.x.warna}else{l.mu[0]+=t.p;l.mu[1]+=t.y}}
+ for(const o of Object.values(O)){const L=Object.values(o.L),all=f=>L.every(l=>l[f][0]==l.pk[0]&&eq(l[f][1],l.pk[1]));o.st=o.batal?'BATAL':!o.closed?'PICKING':all('mu')?'SELESAI':all('ck')?(o.acc?'MUAT':'PENDING'):'CHECKER'}
+ return O}
+function rackData(){const R={},CX=cxSet();const add=(r,k,p,y)=>{if(!r)return;const o=R[r]??={p:0,y:0,it:{}},i=o.it[k]??=[0,0];o.p+=p;o.y+=y;i[0]+=p;i[1]+=y};
+ for(const t of S.tx){if(t.t=='RAK')add(canon(t.x.rak),t.k,t.p,t.y);else if(t.t=='PICK'){if(!CX.has(t.x.ord))add(canon(t.x.rak),t.k,-t.p,-t.y)}else if(t.t=='MOV'){add(canon(t.x.dari),t.k,-t.p,-t.y);add(canon(t.x.rak),t.k,t.p,t.y)}}return R}
+const rackOf=k=>{const R=window._R||(window._R=rackData());return Object.keys(R).filter(r=>R[r].it[k]&&R[r].it[k][0]>0).join(', ')};
+const MAP={TRM:'rec',PICK:'pk',CHK:'ck',MUAT:'mu'},ZZ=()=>({rec:[0,0],rs:[0,0],ri:[0,0],pk:[0,0],ck:[0,0],mu:[0,0]});
+function agg(){const a={},CX=cxSet();for(const t of S.tx){if(t.x&&CX.has(t.x.ord))continue;let f=MAP[t.t];if(t.t=='RAK')f=t.x.sj?'rs':'ri';if(!f)continue;const o=a[t.k]??=ZZ();o[f][0]+=t.p;o[f][1]+=t.y}return a}
+function met(k,a){const o=a[k]||ZZ(),b=S.items[k]||{p:0,y:0},m={},two=fn=>[fn(0),fn(1)];
+ m.saldo=two(j=>(j?b.y:b.p)+o.rec[j]-o.mu[j]);m.belum=two(j=>Math.max(0,o.rec[j]-o.rs[j]));m.sem=two(j=>o.pk[j]-o.mu[j]);m.wchk=two(j=>o.pk[j]-o.ck[j]);m.wmu=two(j=>o.ck[j]-o.mu[j]);
+ m.atp=two(j=>m.saldo[j]-m.sem[j]-m.belum[j]);
+ m.st=m.saldo[0]<0?['Saldo minus','B']:m.belum[0]>0?['Belum di rak','W']:m.sem[0]>0?['Dalam proses order','I']:['OK','OK'];return m}
+function chk(t,k,p,y,x){const J=sjData(),O=ordData(),a=agg(),R=rackData(),ck=r=>RE.test(canon(r))?'':'Format rak: BLOK-BARIS-TINGKAT, mis. A-1-5.';
+ if(t=='SJ'){const j=J[x.sj];if(j&&j.st!='BUKA')return'SJ ini sudah ditutup. Gunakan nomor SJ lain.';if(x.pl&&!/^https?:[/][/]/i.test(x.pl))return'Link packing list harus diawali http:// atau https://.'}
+ if(t=='TRM'){const j=J[x.sj];if(!j)return'No. SJ belum terdaftar. Isi SJ dulu di tab 1.';if(j.st!='BUKA')return'SJ ini sudah ditutup.';const l=j.L[k];if(!l)return'Item ini tidak ada di SJ '+x.sj+'.';
+  if(l.rp+p>l.sp||l.ry+y>l.sy+0.011)return`Melebihi isi SJ. Sisa: ${nf(l.sp-l.rp)} pcs, ${nf(l.sy-l.ry,1)} yard.`}
+ if(t=='RAK'){const e=ck(x.rak);if(e)return e;
+  if(x.sj){const j=J[x.sj];if(!j)return'No. SJ tidak terdaftar.';if(j.st=='BUKA')return'SJ belum selesai dicek. Selesaikan SJ dulu di tab 2.';const l=j.L[k];if(!l)return'Item ini tidak ada di SJ '+x.sj+'.';
+   if(l.pp+p>l.rp||l.py+y>l.ry+0.011)return`Melebihi barang yang diterima dari SJ ini. Sisa: ${nf(l.rp-l.pp)} pcs, ${nf(l.ry-l.py,1)} yard.`}
+  else{const o=a[k]||ZZ(),b=S.items[k];if(o.ri[0]+p>b.p||o.ri[1]+y>b.y+0.011)return`Melebihi stok awal item ini. Belum ditempatkan: ${nf(b.p-o.ri[0])} pcs, ${nf(b.y-o.ri[1],1)} yard.`}}
+ if(t=='PICK'){const e=ck(x.rak);if(e)return e;if(!x.po&&!x.pl)return'Isi No. PO atau No. Packing list agar order bisa dicari di Checker.';if(O[x.ord]?.batal)return'Order ini sudah dibatalkan.';if(O[x.ord]?.closed)return'Picking order ini sudah diselesaikan.';const h=R[canon(x.rak)]?.it[k]||[0,0];
+  if(p>h[0]||y>h[1]+0.011)return`Rak ${canon(x.rak)} hanya berisi ${nf(h[0])} pcs, ${nf(h[1],1)} yard barang ini.`}
+ if(t=='CHK'||t=='MUAT'){const o=O[x.ord];if(!o)return'Order tidak ditemukan.';if(o.batal)return'Order ini sudah dibatalkan.';if(!o.closed)return'Picking order belum diselesaikan.';if(t=='MUAT'&&!o.acc)return'Order berstatus PENDING: belum disetujui (pembayaran lunas dan pasti kirim). Minta persetujuan di tab Persetujuan bayar.';const l=o.L[k];if(!l)return'Item ini tidak ada di order '+x.ord+'.';
+  const s=t=='CHK'?l.ck:l.mu,r0=(t=='CHK'?l.pk:l.ck),rp=r0[0]-s[0],ry=r0[1]-s[1];
+  if(rp<=0&&ry<=Math.max(0.011,TOL))return t=='CHK'?'Item ini sudah dicek.':'Item ini belum dicek checker atau sudah dimuat.';
+  if(p!=rp||!eq(y,ry))return`Tidak sama dengan hasil ${t=='CHK'?'picking':'checker'} (${nf(rp)} pcs, ${nf(ry,1)} yard).`+(t=='CHK'?' Minta picker mengoreksi.':'');
+  if(t=='MUAT'){if(x.desain.toLowerCase()!=(l.d||'').toLowerCase())return`Kode desain berbeda dengan hasil checker (${l.d}).`;if(x.warna.toLowerCase()!=(l.w||'').toLowerCase())return`Warna berbeda dengan hasil checker (${l.w}).`}}
+ if(t=='MOV'){const e=ck(x.dari)||ck(x.rak);if(e)return e;const d=canon(x.dari),h=R[d]?.it[k]||[0,0];if(h[0]<=0&&h[1]<=0.005)return`Barang ini tidak tercatat di rak ${d}.`;if(canon(x.rak)==d)return'Rak asal dan tujuan sama.';
+  if(p>h[0])return`Pcs melebihi isi rak ${d} (${nf(h[0])}).`;if(y>h[1]+0.011)return`Yard melebihi isi rak ${d} (${nf(h[1],1)}).`}
+ return''}
+function nav(){$('#nav').innerHTML=[['DASH','Ringkasan'],['STOK','Stok per item'],['MST','Master barang'],['REG','Register inbound'],['PETA','Peta rak'],['LAP','Riwayat & laporan'],['LBL','Label & barcode'],['SET','Pengaturan'],...Object.entries(TABS).flatMap(([k,v])=>k=='CHK'?[[k,v.l],['ACC','6 Persetujuan bayar']]:[[k,v.l]])].map(([k,l])=>`<button class="${tab==k?'on':''}" data-t="${k}">${l}</button>`).join('');
+ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;q='';fs='';render()})}
+function lists(){const J=sjData(),O=ordData(),o=x=>Object.keys(x).map(k=>`<option value="${esc(k)}">`).join('');$('#dsj').innerHTML=o(J);$('#dord').innerHTML=o(O);$('#dpo').innerHTML=Object.values(O).filter(r=>r.closed&&!r.batal).flatMap(r=>[r.po,r.pl].filter(Boolean).map(v=>`<option value="${esc(v)}">${esc(r.ord)} · ${esc(r.pihak||'')}</option>`)).join('')}
+function empty(){return`<div class="card"><h2>Mulai</h2><p>Pilihan 1: klik <b>Impor Inventory Control (.xlsx)</b> di atas untuk memuat ribuan item sekaligus. Pilihan 2: <b>mulai tanpa impor</b>. Item didaftarkan otomatis saat Anda mencatat inbound di tab 1, atau manual di menu Master barang.</p><p><button class="p" id="mulai" type="button">Mulai tanpa impor</button></p><p class="hint">Data dibagi ke semua pengguna yang membuka halaman ini dengan hak ubah. Jika koneksi bersama gagal, data hanya tersimpan di browser ini. Unduh Excel secara berkala sebagai cadangan.</p></div>`}
+const TB=(h,rows,empt)=>`<div class="tw"><table><tr>${h.map(x=>`<th${x[0]=='#'?' class="n"':''}>${x.replace(/^#/,'')}</th>`).join('')}</tr>${rows||`<tr><td colspan="${h.length}" class="hint">${empt||'Belum ada data.'}</td></tr>`}</table></div>`;
+const nm=k=>esc(S.items[k]?.n);
+function dash(){const a=agg(),ks=Object.keys(S.items),T={saldo:[0,0],belum:[0,0],sem:[0,0],wchk:[0,0],wmu:[0,0]};let minus=0;
+ for(const k of ks){const m=met(k,a);for(const i in T){T[i][0]+=m[i][0];T[i][1]+=m[i][1]}if(m.st[1]=='B')minus++}
+ const K=(l,v)=>`<div class="card kpi"><b>${nf(v[0])} pcs</b><span>${l} · ${nf(v[1],1)} yard</span></div>`;
+ const J=sjData(),O=Object.values(ordData()),sjb=Object.values(J).filter(j=>j.st=='BUKA').length;
+ const orows=O.filter(o=>o.st!='SELESAI'&&o.st!='BATAL').slice(-12).reverse().map(o=>`<tr><td>${esc(o.ord)}</td><td>${esc(o.pihak)}</td><td>${Object.keys(o.L).length} item</td><td><span class="tag ${o.st=='PICKING'?'I':'W'}">${{PICKING:'Picking',CHECKER:'Menunggu checker',PENDING:'PENDING: menunggu ACC bayar',MUAT:'Disetujui, siap muat'}[o.st]}</span></td></tr>`).join('');
+ const rec=S.tx.filter(t=>TABS[t.t]).slice(-8).reverse().map(t=>`<tr><td>${t.tgl}</td><td>${TABS[t.t].l}</td><td>${esc(t.k)}</td><td class="n">${nf(t.p)}</td><td class="n">${nf(t.y,1)}</td></tr>`).join('');
+ return`<div class="flow">${Object.entries(TABS).filter(([k])=>k!='MOV').flatMap(([k,v])=>k=='CHK'?[v,{l:'6 Persetujuan bayar'}]:[v]).map(v=>`<span>${v.l}</span>`).join('')}</div><div class="grid">${K('Saldo rill',T.saldo)}${K('Diterima, belum di rak',T.belum)}${K('Terpotong sementara (picking s/d muat)',T.sem)}${K('Menunggu checker',T.wchk)}${K('Menunggu muat',T.wmu)}</div>
+ <div class="card"><b>${nf(ks.length)}</b> item, <b>${nf(minus)}</b> bersaldo minus. <b>${sjb}</b> SJ masih dicek. <b>${O.filter(o=>o.st!='SELESAI'&&o.st!='BATAL').length}</b> order berjalan, <b>${O.filter(o=>o.st=='PENDING').length}</b> di antaranya PENDING menunggu ACC pembayaran.</div>
+ <div class="card"><h2>Order berjalan</h2>${TB(['No. order','Customer','Isi','Tahap'],orows,'Tidak ada order berjalan.')}</div>
+ <div class="card"><h2>Aktivitas terakhir</h2>${TB(['Tanggal','Tahap','Kode','#Pcs','#Yard'],rec,'Belum ada transaksi. Mulai dari tab 1 Surat jalan.')}</div>`}
+function stok(){const a=agg(),ql=q.toLowerCase();let rows=[];
+ for(const k in S.items){const it=S.items[k];if(ql&&!(k.toLowerCase().includes(ql)||it.n.toLowerCase().includes(ql)))continue;const m=met(k,a);if(fs&&m.st[0]!=fs)continue;rows.push([k,it,m])}
+ const sh=rows.slice(0,150).map(([k,it,m])=>`<tr><td>${esc(k)}</td><td>${esc(it.n)}</td><td>${esc(it.g)}</td><td class="n">${nf(m.saldo[0])}</td><td class="n">${nf(m.saldo[1],1)}</td><td class="n">${nf(m.belum[0])}</td><td class="n">${nf(m.sem[0])}</td><td class="n">${nf(m.atp[0])}</td><td class="n">${nf(m.atp[1],1)}</td><td>${esc(rackOf(k))}</td><td><span class="tag ${m.st[1]}">${m.st[0]}</span></td></tr>`).join('');
+ return`<div class="card"><form onsubmit="return false"><label class="wide">Cari kode atau nama<input id="q" value="${esc(q)}" autocomplete="off"></label><label>Status<select id="fs"><option value="">Semua</option>${['OK','Saldo minus','Belum di rak','Dalam proses order'].map(s=>`<option ${fs==s?'selected':''}>${s}</option>`).join('')}</select></label></form><p class="hint">${nf(rows.length)} item cocok${rows.length>150?', menampilkan 150 pertama. Persempit pencarian.':'.'} Saldo rill baru berkurang setelah muat. Tersedia = saldo rill dikurangi yang terpotong sementara dan yang belum di rak.</p></div>
+ <div class="card">${TB(['Kode barang','Nama barang','Gudang','#Saldo rill pcs','#Saldo rill yard','#Belum di rak pcs','#Terpotong sementara pcs','#Tersedia pcs','#Tersedia yard','Rak','Status'],sh)}</div>`}
+function peta(){const R=rackData(),ql=pq.toLowerCase();let mx=0;const oth=[];
+ for(const r in R){mx=Math.max(mx,R[r].p);if(!RE.test(r))oth.push(r)}
+ const hit=r=>ql&&R[r]&&Object.entries(R[r].it).some(([k,v])=>v[0]>0&&(k.toLowerCase().includes(ql)||(S.items[k]?.n||'').toLowerCase().includes(ql)));
+ const cell=r=>{const o=R[r],lv=!o||o.p<=0?0:Math.min(4,1+Math.floor(3.999*o.p/(mx||1)));return`<button class="rc l${lv}${hit(r)?' hit':''}${sel==r?' sel':''}" data-r="${r}" title="${r}"><b>${o?nf(o.p):'-'}</b>${o&&o.y>0?nf(o.y)+' yd':'&nbsp;'}</button>`};
+ const blocks=[...new Set([...PBL.split(',').map(s=>s.trim().toUpperCase()).filter(Boolean),...Object.keys(R).map(r=>RE.exec(r)).filter(Boolean).map(m=>m[1])])].sort();
+ const map=blocks.map(b=>{let nb=PB,nt=PT;for(const r in R){const m=RE.exec(r);if(m&&m[1]==b){nb=Math.max(nb,+m[2]);nt=Math.max(nt,+m[3])}}
+  let g='<div class="ax"></div>';for(let i=1;i<=nb;i++)g+=`<div class="ax">${i}</div>`;
+  for(let t=nt;t>=1;t--){g+=`<div class="ax">T${t}</div>`;for(let i=1;i<=nb;i++)g+=cell(canon(b+'-'+i+'-'+t))}
+  return`<div class="card blk"><h3>Blok ${esc(b)}</h3><div class="shelf" style="grid-template-columns:34px repeat(${nb},minmax(58px,1fr))">${g}</div></div>`}).join('');
+ const hits=ql?Object.keys(R).filter(hit):[];
+ let det='';if(sel){const o=R[sel],its=o?Object.entries(o.it).filter(([k,v])=>v[0]>0||v[1]>0.005):[];
+  det=`<div class="card"><h2>Rak ${esc(sel)}</h2>${its.length?TB(['Kode barang','Nama barang','#Pcs','#Yard'],its.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${nm(k)}</td><td class="n">${nf(v[0])}</td><td class="n">${nf(v[1],1)}</td></tr>`).join('')):'<p class="hint">Rak ini kosong. Catat penempatan di tab 3 Masuk rak.</p>'}</div>`}
+ return`<div class="card"><form class="pf" onsubmit="return false"><label class="wide">Cari barang (kode atau nama), rak yang berisi akan ditandai<input id="pq" value="${esc(pq)}" autocomplete="off"></label><label>Blok (pisah koma)<input id="pbl" value="${esc(PBL)}"></label><label>Jumlah baris<input id="pb" type="number" min="1" value="${PB}"></label><label>Jumlah tingkat<input id="pt" type="number" min="1" value="${PT}"></label></form>
+ ${ql?`<p class="hint">${hits.length?'Ditemukan di rak: <b>'+hits.map(esc).join(', ')+'</b>':'Tidak ada rak yang berisi barang itu.'}</p>`:''}
+ <p class="lg"><span><i></i>kosong</span><span><i class="rc l1"></i>sedikit</span><span><i class="rc l3"></i>sedang</span><span><i class="rc l4"></i>penuh</span><span>Angka = Pcs, di bawahnya Yard. Isi rak berkurang saat picker mengambil barang. Klik rak untuk melihat isinya.</span></p>${!Object.keys(R).length?'<p class="hint">Belum ada penempatan rak. Catat di tab 3 Masuk rak dengan format A-1-5.</p>':''}</div>
+ ${det}${map}${oth.length?`<div class="card"><h2>Kode rak di luar format BLOK-BARIS-TINGKAT</h2><div class="grid">${oth.map(cell).join('')}</div></div>`:''}`}
+const sjCard=j=>{const L=Object.entries(j.L),ok=L.length&&L.every(([,l])=>l.rp==l.sp&&eq(l.ry,l.sy));
+ const rows=L.map(([k,l])=>{const dp=l.rp-l.sp,dy=l.ry-l.sy,m=dp==0&&eq(dy,0);return`<tr><td>${esc(k)}</td><td>${nm(k)}</td><td class="n">${nf(l.sp)}</td><td class="n">${nf(l.sy,1)}</td><td class="n">${nf(l.rp)}</td><td class="n">${nf(l.ry,1)}</td><td class="n">${nf(dp)}</td><td class="n">${nf(dy,1)}</td><td><span class="tag ${m?'OK':'W'}">${m?'Cocok':'Belum cocok'}</span></td></tr>`}).join('');
+ return`<div class="card"><h2>SJ ${esc(j.sj)} ${j.pihak?'· '+esc(j.pihak):''} <span class="tag ${j.st=='BUKA'?'W':j.st=='SELESAI'?'OK':'B'}">${j.st=='BUKA'?'Sedang dicek':j.st=='SELESAI'?'Selesai':'Selesai dengan selisih'}</span></h2>${TB(['Kode','Nama','#SJ pcs','#SJ yard','#Diterima pcs','#Diterima yard','#Selisih pcs','#Selisih yard','Cek'],rows)}
+ ${j.st=='BUKA'?`<p><button class="p" data-act="sjok" data-id="${esc(j.sj)}" ${ok?'':'disabled'}>Selesaikan SJ</button> <button data-act="sjdiff" data-id="${esc(j.sj)}">Tutup dengan selisih</button></p>${ok?'':'<p class="hint">Tombol Selesaikan SJ aktif setelah semua item cocok dengan SJ.</p>'}`:j.cat?`<p class="hint">Catatan selisih: ${esc(j.cat)}</p>`:''}</div>`};
+const PANEL={
+ SJ:()=>{const J=Object.values(sjData()).reverse().slice(0,20);return`<div class="card"><h2>Daftar SJ</h2>${TB(['No. SJ','Supplier','Tanggal','#Item','#Pcs','#Yard','Status'],J.map(j=>{const L=Object.values(j.L);return`<tr><td>${esc(j.sj)}</td><td>${esc(j.pihak)}</td><td>${j.tgl}</td><td class="n">${L.length}</td><td class="n">${nf(L.reduce((s,l)=>s+l.sp,0))}</td><td class="n">${nf(L.reduce((s,l)=>s+l.sy,0),1)}</td><td>${{BUKA:'Sedang dicek',SELESAI:'Selesai',SELISIH:'Selisih'}[j.st]}</td></tr>`}).join(''),'Belum ada SJ.')}</div>`},
+ TRM:()=>{const J=Object.values(sjData()).filter(j=>j.st=='BUKA').reverse();return J.length?J.slice(0,8).map(sjCard).join(''):'<div class="card"><p class="hint">Tidak ada SJ yang sedang dicek. Isi SJ baru di tab 1.</p></div>'},
+ RAK:()=>{const r=[];for(const j of Object.values(sjData()))if(j.st!='BUKA')for(const[k,l]of Object.entries(j.L)){const p=l.rp-l.pp,y=l.ry-l.py;if(p>0||y>Math.max(0.011,TOL))r.push(`<tr><td>${esc(j.sj)}</td><td>${esc(k)}</td><td>${nm(k)}</td><td class="n">${nf(p)}</td><td class="n">${nf(y,1)}</td></tr>`)}
+  return`<div class="card"><h2>Impor stok awal rak (Excel)</h2><p class="hint">Kolom: RACK, DETAIL RACK, KODE BARANG, NAMA BARANG, QTY, YARD. Dipakai untuk menempatkan stok awal tanpa SJ. Setiap baris dicek: kode harus ada dan total per item tidak boleh melebihi stok awal.</p><input type="file" id="rkf" accept=".xlsx,.xls,.csv"></div><div class="card"><h2>Menunggu masuk rak</h2>${TB(['No. SJ','Kode','Nama','#Pcs','#Yard'],r.join(''),'Tidak ada barang yang menunggu masuk rak.')}</div>`},
+ PICK:()=>{const O=Object.values(ordData()).filter(o=>!o.closed&&!o.batal).reverse();return O.length?O.slice(0,8).map(o=>`<div class="card"><h2>Order ${esc(o.ord)} ${o.pihak?'· '+esc(o.pihak):''} <span class="tag I">Picking</span></h2>${TB(['Kode','Nama','#Pcs','#Yard'],Object.entries(o.L).map(([k,l])=>`<tr><td>${esc(k)}</td><td>${nm(k)}</td><td class="n">${nf(l.pk[0])}</td><td class="n">${nf(l.pk[1],1)}</td></tr>`).join(''))}<p><button class="p" data-act="ost" data-id="${esc(o.ord)}">Selesaikan picking</button> <button data-acc="batal" data-id="${esc(o.ord)}">Batalkan order</button></p></div>`).join(''):'<div class="card"><p class="hint">Tidak ada order yang sedang di-picking.</p></div>'},
+ CHK:()=>wait('pk','ck','Menunggu dicek checker'),
+ MUAT:()=>{const pd=Object.values(ordData()).filter(o=>o.st=='PENDING');return(pd.length?`<div class="card"><p class="hint"><span class="tag W">PENDING</span> ${pd.length} order menunggu persetujuan pembayaran: ${pd.map(o=>esc(o.ord)).join(', ')}. Muat baru bisa setelah disetujui di tab Persetujuan bayar.</p></div>`:'')+wait('ck','mu','Siap muat (sudah disetujui)',1)}};
+function wait(a,b,t,ac){const r=[];for(const o of Object.values(ordData()))if(o.closed&&!o.batal&&(!ac||o.acc))for(const[k,l]of Object.entries(o.L)){const p=l[a][0]-l[b][0],y=l[a][1]-l[b][1];if(p>0||y>Math.max(0.011,TOL))r.push(`<tr><td>${esc(o.ord)}</td><td>${esc(o.po)}</td><td>${esc(o.pl)}</td><td>${esc(o.pihak)}</td><td>${esc(k)}</td><td>${nm(k)}</td><td>${esc(a=='ck'?l.d:'')}</td><td>${esc(a=='ck'?l.w:'')}</td><td class="n">${nf(p)}</td><td class="n">${nf(y,1)}</td></tr>`)}
+ return`<div class="card"><h2>${t}</h2>${TB(['No. order','No. PO','Packing list','Customer','Kode','Nama','Kode desain','Warna','#Pcs','#Yard'],r.join(''),'Tidak ada.')}</div>`}
+const mid=k=>'m'+btoa(unescape(encodeURIComponent(k))).replace(/[+]/g,'-').replace(/[/]/g,'_').replace(/=+$/,'');
+async function addItem(k,it){if(DB){await DB.collection('master').doc(mid(k)).set({k,n:it.n,g:it.g,p:it.p,y:it.y})}else{S.items[k]=it;save();dlist()}}
+function mergeItems(){S.items={...IMP,...MAN};dlist();rr()}
+function mst(){const ql=q.toLowerCase(),ks=Object.keys(S.items).filter(k=>!ql||k.toLowerCase().includes(ql)||S.items[k].n.toLowerCase().includes(ql));
+ const rows=ks.slice(0,100).map(k=>{const i=S.items[k];return`<tr><td>${esc(k)}</td><td>${esc(i.n)}</td><td>${esc(i.g)}</td><td class="n">${nf(i.p)}</td><td class="n">${nf(i.y,1)}</td><td><button data-me="${esc(k)}">Ubah</button></td></tr>`}).join('');
+ return`<div class="card"><h2>Master barang</h2><form id="mf" class="pf" onsubmit="return false"><label>Kode barang<input name="k" value="${esc(ME.k)}" autocomplete="off"></label><label class="wide">Nama barang<input name="n" value="${esc(ME.n)}" autocomplete="off"></label><label>Gudang<select name="g">${[...new Set(['MAB05','MAB03','RM04',ME.g])].map(g=>`<option ${ME.g==g?'selected':''}>${esc(g)}</option>`).join('')}</select></label><label>Stok awal Pcs<input name="p" type="number" min="0" step="1" value="${esc(ME.p)}"></label><label>Stok awal Yard<input name="y" type="number" min="0" step="0.01" value="${esc(ME.y)}"></label><button class="p" id="mfs" type="button">Simpan item</button></form><div id="msg"></div><p class="hint">Kode baru dari tab 1 Inbound (SJ) otomatis masuk sini. Isi stok awal hanya untuk barang yang sudah ada di gudang sebelum WMS dipakai. Mengubah item tidak mengubah riwayat transaksinya. Item dengan kode yang sama akan diperbarui.</p></div>
+ <div class="card"><form class="pf" onsubmit="return false"><label class="wide">Cari kode atau nama<input id="mq" value="${esc(q)}" autocomplete="off"></label></form><p class="hint">${nf(ks.length)} item${ks.length>100?', menampilkan 100 pertama':''}.</p>${TB(['Kode barang','Nama barang','Gudang','#Stok awal pcs','#Stok awal yard',''],rows,'Belum ada item. Isi form di atas atau catat inbound di tab 1.')}</div>`}
+function acc(){const O=Object.values(ordData()).filter(o=>o.closed).reverse();
+ const stt=o=>({CHECKER:['Menunggu checker','I'],PENDING:['PENDING: menunggu ACC pembayaran','W'],MUAT:['Disetujui, siap muat','OK'],SELESAI:['Sudah dimuat','OK'],BATAL:['Dibatalkan','B']}[o.st]);
+ const rows=O.slice(0,60).map(o=>{const[t,c]=stt(o),s=Object.values(o.L).reduce((a,l)=>[a[0]+l.pk[0],a[1]+l.pk[1]],[0,0]),x=o.accx||{};
+  return`<tr><td>${esc(o.ord)}</td><td>${esc(o.pihak)}</td><td class="n">${Object.keys(o.L).length}</td><td class="n">${nf(s[0])}</td><td class="n">${nf(s[1],1)}</td><td><span class="tag ${c}">${t}</span></td><td>${o.acc?esc(x.bukti)+' · '+esc(x.penyetuju)+' · '+dmy(x.tgl):''}</td><td>${o.st=='SELESAI'||o.st=='BATAL'?'':`<button data-acc="batal" data-id="${esc(o.ord)}">Batalkan</button> `+(o.acc?`<button data-acc="tahan" data-id="${esc(o.ord)}">Tahan</button>`:`<button data-acc="pilih" data-id="${esc(o.ord)}">Pilih</button>`)}</td></tr>`}).join('');
+ const pd=O.filter(o=>o.st=='PENDING').length;
+ return`<div class="card"><h2>Persetujuan pembayaran</h2><form id="af" class="pf" onsubmit="return false"><label>No. order<input name="ord" list="dord" value="${esc(AO)}" autocomplete="off"></label><label>No. bukti pembayaran / invoice<input name="bukti" autocomplete="off"></label><label>Nominal (opsional)<input name="nominal" autocomplete="off"></label><label>Nama penyetuju<input name="penyetuju" value="${esc(NAME||LAST.pen||'')}" autocomplete="off"></label><label class="wide">Catatan<input name="cat" autocomplete="off"></label><button class="p" id="afs" type="button">Setujui: lunas dan pasti kirim</button></form><div id="msg"></div><p class="hint">Order yang selesai di-picking berstatus PENDING sampai pembayaran lunas dan pengiriman dipastikan. Hanya order yang disetujui yang bisa dimuat di tab 7 Muat. Tombol Tahan mengembalikan order ke PENDING.</p></div>
+ <div class="card"><h2>Order</h2><p class="hint">${pd} order PENDING menunggu persetujuan.</p>${TB(['No. order','Customer','#Item','#Pcs','#Yard','Status','Disetujui (bukti · penyetuju · tanggal)',''],rows,'Belum ada order yang selesai di-picking.')}</div>`}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-acc]');if(!b)return;const id=b.dataset.id;
+ if(b.dataset.acc=='pilih'){AO=id;render();return}
+ if(!CAN)return alert('Akun Anda hanya bisa melihat.');const o=ordData()[id];if(!o)return;
+ const bt=b.dataset.acc=='batal';if(o.batal)return alert('Order sudah dibatalkan.');if(Object.values(o.L).some(l=>l.mu[0]>0||l.mu[1]>0.011))return alert(bt?'Order sudah mulai dimuat, tidak bisa dibatalkan.':'Order sudah mulai dimuat, tidak bisa ditahan.');if(!(await guard()))return;
+ const c=await uiPrompt('Alasan '+(bt?'membatalkan':'menahan')+' order '+id+' (wajib diisi):');if(!c||!c.trim())return;if(bt&&!(await uiConfirm('Batalkan order '+id+'? Barang yang sudah di-picking dianggap kembali ke rak asalnya. Pastikan barang sudah dikembalikan secara fisik.')))return;
+ try{await put(bt?{t:'ORDX',tgl:tod(),k:'',p:0,y:0,x:{ord:id,alasan:c.trim(),pembatal:NAME||LAST.pen||'',tgl:tod()},ts:Date.now()}:{t:'ACC',tgl:tod(),k:'',p:0,y:0,x:{ord:id,status:'TAHAN',cat:c.trim(),penyetuju:NAME||LAST.pen||'',tgl:tod()},ts:Date.now()});render()}catch(er){alert('Gagal ('+(er.code||er.message)+').')}});
+function cxSet(){return new Set(S.tx.filter(t=>t.t=='ORDX').map(t=>t.x.ord))}
+function toast(m){const e=document.createElement('div');e.className='toast';e.textContent=String(m);document.body.appendChild(e);setTimeout(()=>e.remove(),5000)}
+function alert(m){toast(m)}
+function dlg(msg,inp,pw){return new Promise(res=>{const o=document.createElement('div');o.className='ovl';o.innerHTML=`<div class="dlg"><p>${esc(msg)}</p>${inp?`<input id="dlgi" ${pw?'type="password"':''} autocomplete="off">`:''}<div class="dbt"><button id="dlgno" type="button">Batal</button><button class="p" id="dlgok" type="button">OK</button></div></div>`;document.body.appendChild(o);const i=o.querySelector('#dlgi');if(i)i.focus();const done=v=>{o.remove();res(v)};o.querySelector('#dlgok').onclick=()=>done(inp?i.value:true);o.querySelector('#dlgno').onclick=()=>done(inp?null:false);if(i)i.onkeydown=e=>{if(e.key=='Enter')done(i.value);if(e.key=='Escape')done(null)}})}
+const uiConfirm=m=>dlg(m,0),uiPrompt=(m,pw)=>dlg(m,1,pw);
+async function hpin(p){const s='wms:'+p;try{if(crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}}catch(e){}let h=5381;for(const c of s)h=((h<<5)+h+c.charCodeAt(0))|0;return'h'+h}
+async function guard(){if(!PINH||PINOK)return true;const p=await uiPrompt('Masukkan PIN admin:',true);if(p===null)return false;if((await hpin(p))===PINH){PINOK=true;return true}alert('PIN salah.');return false}
+function setMode(m){MODE=m;tab=m=='pet'?'HOME':'DASH';fx=true;try{location.hash=m=='pet'?'petugas':''}catch(e){}render()}
+function pet(){
+ if(!NAME)return`<div class="card"><h2>Siapa Anda?</h2><form class="pf" onsubmit="return false"><label>Nama petugas<input id="pn" autocomplete="off" placeholder="mis. Budi"></label><button class="p" id="pns" type="button">Mulai</button></form><p class="hint">Nama ini otomatis terisi di setiap catatan Anda.</p></div>`;
+ const top=`<div class="ptop"><button data-pet="home">Beranda</button><b>${esc(NAME)}</b><button data-pet="name">Ganti nama</button><button data-pet="adm">Admin</button></div>`;
+ if(tab=='CEK')return top+petCek();
+ if(TABS[tab])return top+stage(tab);
+ const J=Object.values(sjData()),O=Object.values(ordData()),c={},tl=Math.max(0.011,TOL);let rw=0;
+ for(const j of J)if(j.st!='BUKA')for(const l of Object.values(j.L))if(l.rp-l.pp>0||l.ry-l.py>tl)rw++;
+ const has=(o,a,b)=>Object.values(o.L).some(l=>l[a][0]-l[b][0]>0||l[a][1]-l[b][1]>tl);
+ c.TRM=J.filter(j=>j.st=='BUKA').length;c.RAK=rw;c.PICK=O.filter(o=>!o.closed&&!o.batal).length;c.CHK=O.filter(o=>o.closed&&!o.batal&&has(o,'pk','ck')).length;c.MUAT=O.filter(o=>o.closed&&!o.batal&&o.acc&&has(o,'ck','mu')).length;
+ const B=[['SJ','1 Isi SJ'],['TRM','2 Terima barang'],['RAK','3 Masuk rak'],['PICK','4 Picker'],['CHK','5 Checker'],['MUAT','Muat'],['MOV','Pindah rak'],['CEK','Cek barang']];
+ return top+`<div class="pgrid">${B.map(([k,l])=>`<button data-pt="${k}">${l}${c[k]?`<br><span class="tag W">${c[k]} menunggu</span>`:''}</button>`).join('')}</div>`}
+function petCek(){const ql=PK.trim().toLowerCase(),ks=Object.keys(S.items);let out='';
+ if(ql){const ex=ks.find(k=>k.toLowerCase()==ql),cs=ex?[ex]:ks.filter(k=>k.toLowerCase().includes(ql)||S.items[k].n.toLowerCase().includes(ql)).slice(0,8);
+  if(cs.length==1){const k=cs[0],it=S.items[k],m=met(k,agg()),R=rackData(),rk=Object.keys(R).filter(r=>R[r].it[k]&&R[r].it[k][0]>0).sort();
+   out=`<div class="card"><h2>${esc(k)}</h2><p>${esc(it.n)}</p><div class="grid"><div class="kpi"><b>${nf(m.saldo[0])}</b><span>Saldo pcs · ${nf(m.saldo[1],1)} yd</span></div><div class="kpi"><b>${nf(m.atp[0])}</b><span>Tersedia pcs · ${nf(m.atp[1],1)} yd</span></div></div><h2 style="margin-top:12px">Lokasi rak</h2>${rk.length?TB(['Rak','#Pcs','#Yard'],rk.map(r=>`<tr><td><b>${esc(r)}</b></td><td class="n">${nf(R[r].it[k][0])}</td><td class="n">${nf(R[r].it[k][1],1)}</td></tr>`).join('')):'<p class="hint">Belum ada di rak.</p>'}<p class="hint">Belum di rak ${nf(m.belum[0])} pcs · Terpotong sementara ${nf(m.sem[0])} pcs · ${m.st[0]}</p></div>`}
+  else out=cs.length?`<p class="hint">Pilih item:</p><div class="pgrid">${cs.map(k=>`<button data-pk="${esc(k)}">${esc(k)}<br><small>${esc(S.items[k].n)}</small></button>`).join('')}</div>`:'<p class="hint">Item tidak ditemukan.</p>'}
+ return`<div class="card"><h2>Cek barang</h2><form class="pf" onsubmit="return false"><label>Scan atau ketik kode / nama<input id="pck" list="dl" value="${esc(PK)}" autocomplete="off"></label></form></div>${out}`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pt],[data-pet],[data-pk],#pns');if(!b)return;
+ if(b.id=='pns'){const v=$('#pn').value.trim();if(!v)return;NAME=v;try{localStorage.setItem('wms_name',v)}catch(x){}tab='HOME'}
+ else if(b.dataset.pt){tab=b.dataset.pt;fx=true}
+ else if(b.dataset.pk!==undefined){PK=b.dataset.pk}
+ else{const a=b.dataset.pet;if(a=='home')tab='HOME';else if(a=='name'){NAME='';try{localStorage.removeItem('wms_name')}catch(x){}}else if(a=='adm'){setMode('adm');return}}
+ render()});
+function lbl(){const rows=LB.map(l=>`<div class="lbl"><svg class="bc" data-c="${esc(l.c)}"></svg><b>${esc(l.t)}</b>${esc(l.s)}</div>`).join('');
+ return`<div class="card noprint"><h2>Label rak dan barcode</h2><p class="hint">Barcode Code 128. Scanner USB atau Bluetooth bekerja seperti keyboard: scan kode barang di kolom Kode barang, atau scan label rak di kolom Rack, lalu tekan Enter (otomatis pindah ke kolom berikutnya).</p>
+ <form class="pf" onsubmit="return false"><label>Blok<input id="lb_b" value="A"></label><label>Jumlah baris<input id="lb_r" type="number" min="1" value="8"></label><label>Jumlah tingkat<input id="lb_t" type="number" min="1" value="4"></label><button type="button" data-lb="range">Buat label rak (rentang)</button><button type="button" data-lb="used">Label semua rak terisi</button></form>
+ <form class="pf" onsubmit="return false" style="margin-top:10px"><label class="wide">Kode barang<input id="lb_k" list="dl" autocomplete="off"></label><button type="button" data-lb="item">Tambah label barang</button><button type="button" data-lb="clear">Kosongkan</button><button type="button" class="p" data-lb="print">Cetak</button></form>
+ <p class="hint">${LB.length} label siap cetak. Lebar label 6,5 cm. Atur ukuran kertas stiker di dialog cetak. Bila tombol Cetak tidak membuka dialog, tekan Ctrl+P.</p></div><div class="lbls">${rows}</div>`}
+function setg(){return`<div class="card"><h2>Pengaturan</h2><form class="pf" onsubmit="return false"><label>Toleransi selisih Yard<input id="tol" type="number" min="0" step="0.01" value="${TOL}"></label><button class="p" id="tolsave" type="button">Simpan</button></form><p class="hint">Berlaku untuk pencocokan SJ, checker, dan muat. Pcs tetap harus sama persis. Contoh: 0,5 berarti selisih sampai 0,5 yard dianggap sama. Isi 0,01 untuk aturan ketat. ${DB?'Pengaturan ini dibagi ke semua pengguna.':'Mode lokal: pengaturan hanya di browser ini.'}</p></div><div class="card"><h2>PIN admin</h2><form class="pf" onsubmit="return false">${PINH?'<label>PIN lama<input id="pold" type="password" autocomplete="off"></label>':''}<label>PIN baru (4 sampai 8 angka)<input id="pnew" type="password" autocomplete="off"></label><label>Ulangi PIN baru<input id="pnew2" type="password" autocomplete="off"></label><button class="p" id="pinsave" type="button">Simpan PIN</button></form><p class="hint">${PINH?'PIN aktif. Kosongkan PIN baru dan ulangannya untuk menghapus PIN.':'PIN belum diatur.'} PIN diminta untuk: Hapus data, impor item, ubah pengaturan, persetujuan pembayaran, tahan atau batalkan order. PIN hanya pengaman ringan di sisi browser, bukan pengganti login: orang dengan hak ubah yang paham teknis masih bisa melewatinya. PIN yang lupa tidak bisa dipulihkan otomatis.</p></div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-lb]');if(!b)return;const a=b.dataset.lb;
+ if(a=='range'){const B=($('#lb_b').value||'A').trim().toUpperCase(),R=+$('#lb_r').value||1,T=+$('#lb_t').value||1;if(R*T>400)return alert('Maksimal 400 label sekali buat.');for(let r=1;r<=R;r++)for(let t=1;t<=T;t++){const c=canon(B+'-'+r+'-'+t);LB.push({c,t:'RAK '+c,s:`Blok ${B} · Baris ${r} · Tingkat ${t}`})}}
+ else if(a=='used'){const ks=Object.keys(rackData()).sort();if(ks.length>400)return alert('Terlalu banyak rak (maks 400). Gunakan rentang.');for(const r of ks)LB.push({c:r,t:'RAK '+r,s:RE.test(r)?'Blok '+r.split('-')[0]:''})}
+ else if(a=='item'){const k=$('#lb_k').value.trim(),i=S.items[k];if(!i)return alert('Kode barang tidak ada di daftar item.');LB.push({c:k,t:k,s:i.n+' · '+(rackOf(k)||'-')})}
+ else if(a=='clear')LB=[];
+ else if(a=='print'){window.print();return}
+ render()});
+function lap(){const ql=hq.trim().toLowerCase(),sl=[];
+ for(const j of Object.values(sjData()).reverse())for(const[k,l]of Object.entries(j.L)){const dp=l.rp-l.sp,dy=l.ry-l.sy;if(dp==0&&eq(dy,0))continue;if(j.st=='BUKA'&&l.rp==0&&l.ry==0)continue;
+  sl.push(`<tr><td>${esc(j.sj)}</td><td>${esc(j.pihak)}</td><td><span class="tag ${j.st=='BUKA'?'W':j.st=='SELESAI'?'OK':'B'}">${{BUKA:'Sedang dicek',SELESAI:'Selesai',SELISIH:'Selisih'}[j.st]}</span></td><td>${esc(k)}</td><td>${nm(k)}</td><td class="n">${nf(l.sp)}</td><td class="n">${nf(l.rp)}</td><td class="n">${nf(dp)}</td><td class="n">${nf(dy,1)}</td><td>${esc(j.cat)}</td></tr>`)}
+ let hist='',cand='';
+ if(ql){const ks=Object.keys(S.items),ex=ks.find(k=>k.toLowerCase()==ql),cs=ex?[ex]:ks.filter(k=>k.toLowerCase().includes(ql)||S.items[k].n.toLowerCase().includes(ql)).slice(0,10);
+  if(cs.length==1){const k=cs[0],it=S.items[k],m=met(k,agg());let sal=it.p;
+   const rows=S.tx.filter(t=>t.k==k&&TABS[t.t]).map(t=>{if(t.t=='TRM')sal+=t.p;if(t.t=='MUAT')sal-=t.p;const x=t.x;return`<tr><td>${t.tgl}</td><td>${TABS[t.t].l}</td><td>${esc(x.sj||x.ord||'')}</td><td>${esc(x.pihak||'')}</td><td>${esc(t.t=='MOV'?x.dari+' > '+x.rak:x.rak||'')}</td><td class="n">${nf(t.p)}</td><td class="n">${nf(t.y,1)}</td><td>${esc(x.petugas||'')}</td><td class="n">${nf(sal)}</td></tr>`}).join('');
+   hist=`<div class="card"><h2>${esc(k)} · ${esc(it.n)}</h2><p class="hint">Gudang ${esc(it.g)}. Stok awal ${nf(it.p)} pcs. Saldo rill ${nf(m.saldo[0])} pcs, ${nf(m.saldo[1],1)} yard. Belum di rak ${nf(m.belum[0])}. Terpotong sementara ${nf(m.sem[0])}. Rak: ${esc(rackOf(k))||'-'}.</p>${TB(['Tanggal','Tahap','No. SJ / order','Supplier / customer','Rak','#Pcs','#Yard','Petugas','#Saldo rill pcs'],rows,'Belum ada transaksi untuk item ini.')}</div>`}
+  else cand=cs.length?`<p class="hint">Pilih item: ${cs.map(k=>`<button data-h="${esc(k)}">${esc(k)}</button>`).join(' ')}</p>`:'<p class="hint">Item tidak ditemukan.</p>'}
+ return`<div class="card"><h2>Riwayat per item</h2><form class="pf" onsubmit="return false"><label class="wide">Cari kode atau nama barang<input id="hq" value="${esc(hq)}" autocomplete="off"></label></form>${cand}</div>${hist}
+ <div class="card"><h2>Laporan selisih SJ</h2>${TB(['No. SJ','Supplier','Status','Kode','Nama','#SJ pcs','#Diterima pcs','#Selisih pcs','#Selisih yard','Catatan'],sl.join(''),'Tidak ada selisih.')}</div>`}
+const FK=[['bentuk','Foto bentuk'],['barang','Foto barang'],['warna','Foto warna'],['desain','Foto desain'],['barcode','Foto barcode']];
+const phF=f=>`<div class="wide fph"><span class="hint">Foto barang masuk (opsional). Di HP bisa langsung kamera atau galeri.</span><div class="phg">${FK.map(([k,l])=>`<label>${l}<input type="file" accept="image/*" name="${f.k}_${k}" data-ph="${k}"><span class="pv" id="pv_${k}"></span></label>`).join('')}</div></div>`;
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open('wms_foto',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function fSet(id,v){if(DB){await DB.collection('foto').doc(id).set(v)}else{const d=await idb();await new Promise((a,b)=>{const t=d.transaction('f','readwrite');t.objectStore('f').put(v,id);t.oncomplete=a;t.onerror=()=>b(t.error)})}}
+async function fGet(id){if(DB){const s=await DB.doc('foto/'+id).get();return s.exists?s.data():null}const d=await idb();return new Promise((a,b)=>{const q=d.transaction('f').objectStore('f').get(id);q.onsuccess=()=>a(q.result||null);q.onerror=()=>b(q.error)})}
+async function shrink(file){const u=URL.createObjectURL(file);const im=await new Promise((a,b)=>{const i=new Image();i.onload=()=>a(i);i.onerror=()=>b({code:'foto_tidak_terbaca',message:'Foto tidak terbaca'});i.src=u});
+ let sc=Math.min(1,1024/Math.max(im.naturalWidth,im.naturalHeight)),q=0.7,blob;
+ for(let n=0;n<6;n++){const c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.naturalWidth*sc));c.height=Math.max(1,Math.round(im.naturalHeight*sc));c.getContext('2d').drawImage(im,0,0,c.width,c.height);blob=await new Promise(r=>c.toBlob(r,'image/jpeg',q));if(blob&&blob.size<=140000)break;q=Math.max(0.4,q-0.1);sc*=0.85}
+ URL.revokeObjectURL(u);return blob}
+async function fotoSave(blob,meta){try{if(typeof claude!=='undefined'){const A=await claude.use('assets');if(A){const r=await A.upload(blob);return'a:'+r.id}}}catch(e){}
+ const d=await new Promise((a,b)=>{const r=new FileReader();r.onload=()=>a(r.result);r.onerror=()=>b(r.error);r.readAsDataURL(blob)});const id=rid();await fSet(id,{d,...meta,ts:Date.now()});return'i:'+id}
+async function fotoUrl(ref){if(ref.startsWith('a:'))return'/_blob/'+ref.slice(2);const v=await fGet(ref.slice(2));return v&&v.d||''}
+const fotoBtn=(m,t)=>m&&typeof m=='object'&&Object.keys(m).length?`<button data-fo="${esc(JSON.stringify(m))}" data-ft="${esc(t||'')}">Foto (${Object.keys(m).length})</button>`:'';
+async function showFoto(map,title){const o=document.createElement('div');o.className='ovl';o.innerHTML=`<div class="dlg" style="max-width:640px;max-height:90vh;overflow:auto"><p><b>${esc(title||'Foto')}</b></p><div class="fgal" id="fgal"></div><div class="dbt"><button id="fotox" type="button">Tutup</button></div></div>`;document.body.appendChild(o);o.querySelector('#fotox').onclick=()=>o.remove();o.onclick=e=>{if(e.target==o)o.remove()};
+ const g=o.querySelector('#fgal');for(const[k,l]of FK){const ref=map[k];if(!ref)continue;const fig=document.createElement('figure'),cap=document.createElement('figcaption'),im=document.createElement('img');cap.textContent=l;fig.append(cap,im);g.appendChild(fig);try{im.src=await fotoUrl(ref)}catch(e){cap.textContent=l+' (gagal dimuat)'}}if(!g.children.length)g.textContent='Tidak ada foto.'}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-fo]');if(!b)return;try{showFoto(JSON.parse(b.dataset.fo),b.dataset.ft)}catch(x){}});
+const selF=f=>`<label>${f.l}<select name="${f.k}">${f.o.map(o=>`<option>${o}</option>`).join('')}</select></label>`;
+const lk=v=>/^https?:[/][/]/i.test(v||'')?`<a href="${esc(v)}" target="_blank" rel="noopener">Buka</a>`:esc(v);
+const MN=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const mname=d=>d&&d.length>=7?MN[+d.slice(5,7)-1]+' '+d.slice(0,4):'',dmy=d=>d?d.split('-').reverse().join('/'):'';
+function regRows(){const J=sjData(),pl={};for(const t of S.tx)if(t.t=='SJ'&&t.x.pl)pl[t.x.sj]=t.x.pl;
+ return S.tx.filter(t=>t.t=='TRM').map(t=>({'TANGGAL':dmy(t.tgl),'MONTH':t.x.month||mname(t.tgl),'NO SURAT JALAN':t.x.sj,'SUPPLIERS':J[t.x.sj]?.pihak||'','DESCRIPTION':t.x.desc||S.items[t.k]?.n||'','KODE BARANG':t.k,'QTY':t.p,'YARD':t.y,'NO.PARTAI':t.x.partai||'','CONDITION ITEM':t.x.kondisi||'','PIC TEAM INBOUND':t.x.petugas||'','LINK PACKING LIST':pl[t.x.sj]||'','JUMLAH FOTO':t.x.foto?Object.keys(t.x.foto).length:0,_f:t.x.foto||null}))}
+function reg(){const all=regRows(),ms=[...new Set(all.map(r=>r.MONTH))],ql=RS.trim().toLowerCase();
+ const rows=all.filter(r=>(!RM||r.MONTH==RM)&&(!ql||[r['NO SURAT JALAN'],r.SUPPLIERS,r.DESCRIPTION,r['KODE BARANG'],r['NO.PARTAI']].join(' ').toLowerCase().includes(ql))).reverse();
+ const tp=rows.reduce((s,r)=>s+r.QTY,0),ty=rows.reduce((s,r)=>s+r.YARD,0);
+ return`<div class="card"><h2>Register inbound masuk</h2><form class="pf" onsubmit="return false"><label>Month<select id="rm"><option value="">Semua</option>${ms.map(m=>`<option ${RM==m?'selected':''}>${m}</option>`).join('')}</select></label><label class="wide">Cari SJ, supplier, description, kode, partai<input id="rs" value="${esc(RS)}" autocomplete="off"></label><button class="p" type="button" data-reg="dl">Unduh Excel</button></form><p class="hint">${rows.length} baris · Total ${nf(tp)} pcs · ${nf(ty,1)} yard. Data dari tab 2 Terima & cek SJ. Link packing list diambil dari tab 1. Kode barang ditambahkan agar stok bisa dilacak.</p></div>
+ <div class="card reg">${TB(['Tanggal','Month','No. surat jalan','Suppliers','Description','Kode barang','#Qty','#Yard','No. partai','Condition item','PIC team inbound','Link packing list','Foto'],rows.slice(0,300).map(r=>`<tr><td>${r.TANGGAL}</td><td>${esc(r.MONTH)}</td><td>${esc(r['NO SURAT JALAN'])}</td><td>${esc(r.SUPPLIERS)}</td><td>${esc(r.DESCRIPTION)}</td><td>${esc(r['KODE BARANG'])}</td><td class="n">${nf(r.QTY)}</td><td class="n">${nf(r.YARD,1)}</td><td>${esc(r['NO.PARTAI'])}</td><td>${esc(r['CONDITION ITEM'])}</td><td>${esc(r['PIC TEAM INBOUND'])}</td><td>${lk(r['LINK PACKING LIST'])}</td><td>${fotoBtn(r._f,r['NO SURAT JALAN'])}</td></tr>`).join(''),'Belum ada barang yang diterima.')}</div>`}
+document.addEventListener('click',e=>{if(!e.target.closest('[data-reg]'))return;const r=regRows();if(!r.length)return alert('Belum ada data untuk diunduh.');const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(r.map(({_f,...o})=>o)),'REGISTER_INBOUND');XLSX.writeFile(wb,'Register_Inbound_'+tod()+'.xlsx')});
+const rkF=(f,t)=>{const s=t=='MOV'?' ('+f.l+')':'';return`<label>Rack${s}<input name="${f.k}_r" required placeholder="mis. A-1" autocomplete="off"></label><label>Detail rack${s}<input name="${f.k}_d" required placeholder="mis. 5" autocomplete="off"></label>`};
+async function importRak(e){const fl=e.target.files[0];if(!fl)return;if(!CAN)return alert('Akun Anda hanya bisa melihat.');
+ try{const wb=XLSX.read(await fl.arrayBuffer(),{type:'array'}),rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+  const nk=o=>Object.fromEntries(Object.entries(o).map(([k,v])=>[String(k).toUpperCase().replace(/[^A-Z]/g,''),v]));
+  const base=S.tx;S.tx=[...base];const ok=[],bad=[];
+  rows.forEach((r0,i)=>{const r=nk(r0),k=String(r.KODEBARANG||'').trim(),rk=String(r.RACK||'').trim(),dt=String(r.DETAILRACK||'').trim(),p=+r.QTY||0,y=+r.YARD||0;
+   if(!k||(!rk&&!dt)||(r.QTY===''&&r.YARD===''))return;const x={sj:'',rak:rk+'-'+dt,nama:S.items[k]?.n||'',petugas:'impor'};
+   const er=!S.items[k]?'Kode barang tidak ada':!(p>0||y>0)?'Qty dan Yard kosong':chk('RAK',k,p,y,x);
+   if(er)bad.push(`Baris ${i+2} (${k}): ${er}`);else{const rec={t:'RAK',tgl:tod(),k,p,y,x,ts:Date.now()+ok.length};ok.push(rec);S.tx.push(rec)}});
+  S.tx=base;for(const rec of ok)await put(rec);render();
+  alert(`${ok.length} baris tersimpan, ${bad.length} ditolak.`+(bad.length?'\n\n'+bad.slice(0,10).join('\n')+(bad.length>10?'\n...':''):''))
+ }catch(er){alert('File tidak terbaca. Pastikan kolom: RACK, DETAIL RACK, KODE BARANG, NAMA BARANG, QTY, YARD.')}e.target.value=''}
+function stage(t){const T=TABS[t];
+ const fld=T.f.map(f=>f.rk?rkF(f,t):f.o?selF(f):f.ph?phF(f):`<label>${f.l}<input name="${f.k}" value="${f.ro?'':esc(f.k=='petugas'&&NAME?NAME:(LAST[f.k]||''))}" ${f.k=='sj'?'list="dsj"':f.k=='ord'?'list="dord"':f.k=='cari'?'list="dpo"':''} ${f.ro?'readonly':''} ${f.r?'required':''} autocomplete="off"></label>`).join('');
+ const list=S.tx.filter(x=>x.t==t).slice(MODE=='pet'?-5:-100).reverse(),cols=T.f.map(f=>f.k);
+ const rows=list.map(x=>`<tr><td>${x.tgl}</td><td>${esc(x.k)}</td><td>${nm(x.k)}</td><td class="n">${nf(x.p)}</td><td class="n">${nf(x.y,1)}</td>${cols.map(c=>`<td>${c=='foto'?fotoBtn(x.x.foto,x.x.sj):lk(x.x[c])}</td>`).join('')}<td><button data-d="${x.id}">Hapus</button></td></tr>`).join('');
+ return`<div class="card"><h2>${T.l}</h2><form id="f"${t=='CHK'?' class="chk"':''}><label>Tanggal<input type="date" name="tgl" value="${tod()}" required></label>${t=='CHK'?'<label>Item hasil picking<select name="k" required><option value="">Cari No. PO / Packing list dulu</option></select></label>':'<label>Kode barang<input name="k" list="dl" required autocomplete="off"></label>'}<label>Pcs${t=='CHK'?' (otomatis)':''}<input name="p" type="number" min="0" step="1" required ${t=='CHK'?'readonly':''}></label><label>Yard${t=='CHK'?' (otomatis)':''}<input name="y" type="number" min="0" step="0.01" required ${t=='CHK'?'readonly':''}></label>${fld}<button class="p">Simpan</button></form><p class="hint" id="nm"></p><p class="hint">${HELP[t]}</p><div id="msg"></div></div>${PANEL[t]?PANEL[t]():''}
+ <div class="card"><h2>Catatan terakhir</h2>${TB(['Tanggal','Kode','Nama','#Pcs','#Yard',...T.f.map(f=>f.l),''],rows,'Belum ada catatan.')}</div>`}
+function bind(){const f=$('#f');
+ if(f){const fill=()=>{const k=f.k.value.trim(),i=S.items[k];$('#nm').textContent=i?`${i.n} · gudang ${i.g}`:(tab=='SJ'&&k?'Kode baru: akan otomatis didaftarkan ke master barang saat disimpan.':'');if(f.nama)f.nama.value=i?i.n:'';if(f.desc&&i)f.desc.value=i.n;if(tab=='CHK'){const l=ordData()[f.ord.value.trim()]?.L[k];if(l){f.p.value=l.pk[0]-l.ck[0];f.y.value=+(l.pk[1]-l.ck[1]).toFixed(2)}else{f.p.value='';f.y.value=''}}
+   if(f.desain&&i){const l=ordData()[f.ord.value.trim()]?.L[k];if(tab=='MUAT'&&l&&l.d){f.desain.value=l.d;f.warna.value=l.w}else{const s=k.split('/');f.desain.value=s[0];f.warna.value=s[1]||''}}};
+  f.k.oninput=fill;if(f.ord)f.ord.oninput=fill;if(f.month){const sm=()=>{f.month.value=mname(f.tgl.value)};f.tgl.oninput=sm;f.tgl.onchange=sm;sm()}
+  if(tab=='CHK'){const tl=Math.max(0.011,TOL);
+   const fi=()=>{const o=ordData()[f.ord.value];f.k.innerHTML='<option value="">Pilih item...</option>';if(!o)return;const ps=Object.entries(o.L).filter(([k,l])=>l.pk[0]-l.ck[0]>0||l.pk[1]-l.ck[1]>tl);ps.forEach(([k,l])=>{const op=document.createElement('option');op.value=k;op.textContent=k+' · '+(S.items[k]?S.items[k].n:'')+' · '+(l.pk[0]-l.ck[0])+' pcs · '+nf(l.pk[1]-l.ck[1],1)+' yd';f.k.appendChild(op)});if(!ps.length)f.k.firstChild.textContent='Semua item order ini sudah dicek';if(ps.length==1){f.k.value=ps[0][0];fill()}};
+   const sc=()=>{const v=f.cari.value.trim().toLowerCase(),hit=v?Object.values(ordData()).find(o=>o.closed&&!o.batal&&[o.po,o.pl,o.ord].some(x=>x&&x.toLowerCase()==v)):null;f.ord.value=hit?hit.ord:'';f.p.value='';f.y.value='';f.nama.value='';f.desain.value='';f.warna.value='';$('#nm').textContent=hit?'Order '+hit.ord+' · '+(hit.pihak||'-')+' · PO '+(hit.po||'-')+' · Packing list '+(hit.pl||'-'):(v?'Tidak ada order selesai-picking dengan No. PO / Packing list itu.':'');fi()};
+   f.cari.oninput=sc;f.cari.onchange=sc;if(f.cari.value)sc()}
+  f.k.addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();fill();f.p.focus()}});
+  TABS[tab].f.filter(c=>c.rk).forEach(c=>{const r=f[c.k+'_r'],d=f[c.k+'_d'];r.addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();const m=RE.exec(r.value.trim().toUpperCase());if(m){r.value=m[1]+'-'+m[2];d.value=m[3]}d.focus()}})});
+  f.onsubmit=async e=>{e.preventDefault();const k=f.k.value.trim(),p=+f.p.value,y=+f.y.value;const isNew=!S.items[k];if(isNew&&tab!='SJ')return msg('Kode barang belum ada di master. Daftarkan lewat tab 1 Inbound (SJ) atau menu Master barang.',1);if(!(p>0||y>0))return msg('Isi Pcs atau Yard.',1);
+   const x={};TABS[tab].f.forEach(c=>x[c.k]=c.ph?'':c.rk?canon(f[c.k+'_r'].value+'-'+f[c.k+'_d'].value):f[c.k].value.trim());const er=chk(tab,k,p,y,x);if(er)return msg(er,1);if(isNew&&!(x.desc||'').trim())return msg('Kode baru: isi Description (nama barang) agar masuk master barang.',1);
+   if(!CAN)return msg('Akun Anda hanya bisa melihat, tidak bisa menyimpan.',1);const keep=f.tgl.value;
+   try{if(isNew)await addItem(k,{n:x.desc.trim(),g:'MAB05',p:0,y:0});const pf=FK.map(([kk])=>[kk,f['foto_'+kk]&&f['foto_'+kk].files[0]]).filter(([,fl])=>fl);if(pf.length){msg('Mengunggah '+pf.length+' foto…');const fo={};for(const[kk,fl]of pf)fo[kk]=await fotoSave(await shrink(fl),{k,kind:kk,sj:x.sj});x.foto=fo}await put({t:tab,tgl:keep,k,p,y,x,ts:Date.now()})}catch(er){return msg('Gagal menyimpan ('+(er.code||er.message)+').',1)}
+   ['sj','ord','pihak','petugas','truk','po','pl','cari'].forEach(c=>{if(x[c]!==undefined)LAST[c]=x[c]});fx=true;render();$('#f').tgl.value=keep;msg(isNew?'Tersimpan. Kode baru otomatis masuk master barang.':'Tersimpan.')}}
+ document.querySelectorAll('[data-d]').forEach(b=>b.onclick=async()=>{if(!CAN)return alert('Akun Anda tidak bisa menghapus.');if(await uiConfirm('Hapus catatan ini? Hasil perhitungan stok dan status akan ikut berubah.')){try{await delTx(b.dataset.d);render()}catch(er){alert('Gagal menghapus ('+(er.code||er.message)+').')}}});
+ const pi=$('#pq');if(pi){const upd=()=>{pq=$('#pq').value;PBL=$('#pbl').value;PB=Math.max(1,+$('#pb').value||8);PT=Math.max(1,+$('#pt').value||4);const id=document.activeElement.id,p=document.activeElement.selectionStart;render();const n=id&&$('#'+id);if(n){n.focus();try{n.setSelectionRange(p,p)}catch(e){}}};['pq','pbl','pb','pt'].forEach(i=>$('#'+i).oninput=upd)}
+ if(typeof JsBarcode!='undefined')document.querySelectorAll('svg.bc').forEach(s=>{try{JsBarcode(s,s.dataset.c,{format:'CODE128',height:40,displayValue:false,margin:0,width:1.6})}catch(e){}});
+ const sv=$('#tolsave');if(sv)sv.onclick=async()=>{if(!(await guard()))return;const v=Math.max(0,+$('#tol').value||0);TOL=v;try{if(DB)await DB.doc('cfg/main').set({tol:v});else localStorage.setItem('wms_tol',String(v));alert('Tersimpan.')}catch(er){alert('Gagal menyimpan ('+(er.code||er.message)+').')}render()};
+ document.querySelectorAll('input[data-ph]').forEach(inp=>inp.onchange=()=>{const pv=$('#pv_'+inp.dataset.ph);if(!pv)return;pv.innerHTML='';const fl=inp.files[0];if(fl){const im=document.createElement('img');im.src=URL.createObjectURL(fl);pv.appendChild(im)}});
+ const ps=$('#pinsave');if(ps)ps.onclick=async()=>{const old=$('#pold')?$('#pold').value:'',n1=$('#pnew').value,n2=$('#pnew2').value;
+  if(PINH&&(await hpin(old))!==PINH)return alert('PIN lama salah.');if(n1!==n2)return alert('PIN baru dan ulangannya tidak sama.');if(n1&&!/^[0-9]{4,8}$/.test(n1))return alert('PIN harus 4 sampai 8 angka.');if(!CAN)return alert('Akun Anda hanya bisa melihat.');
+  const h=n1?await hpin(n1):'';try{if(DB)await DB.doc('cfg/pin').set({h});else localStorage.setItem('wms_pin',h);PINH=h;PINOK=!!h;alert(h?'PIN tersimpan.':'PIN dihapus.');render()}catch(er){alert('Gagal ('+(er.code||er.message)+').')}};
+ const as=$('#afs');if(as)as.onclick=async()=>{const m=$('#af'),ord=m.ord.value.trim(),bukti=m.bukti.value.trim(),pen=m.penyetuju.value.trim(),o=ordData()[ord];
+  if(!o)return msg('Order tidak ditemukan.',1);if(!o.closed)return msg('Picking order belum diselesaikan.',1);if(o.batal)return msg('Order ini sudah dibatalkan.',1);if(o.acc)return msg('Order ini sudah disetujui.',1);if(o.st=='SELESAI')return msg('Order ini sudah dimuat.',1);
+  if(!bukti||!pen)return msg('No. bukti pembayaran dan nama penyetuju wajib diisi.',1);if(!CAN)return msg('Akun Anda hanya bisa melihat.',1);
+  try{if(!(await guard()))return;await put({t:'ACC',tgl:tod(),k:'',p:0,y:0,x:{ord,status:'ACC',bukti,penyetuju:pen,nominal:m.nominal.value.trim(),cat:m.cat.value.trim(),tgl:tod()},ts:Date.now()});LAST.pen=pen;AO='';render();msg(o.st=='PENDING'?'Order '+ord+' disetujui. Siap dimuat.':'Order '+ord+' disetujui. Muat bisa dilakukan setelah checker selesai.')}catch(er){msg('Gagal menyimpan ('+(er.code||er.message)+').',1)}};
+ const mu=$('#mulai');if(mu)mu.onclick=()=>{STARTED=true;tab='SJ';fx=true;render()};
+ const mq=$('#mq');if(mq)mq.oninput=()=>{q=mq.value;const p=mq.selectionStart;render();const n=$('#mq');n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
+ const ms=$('#mfs');if(ms)ms.onclick=async()=>{const m=$('#mf'),k=m.k.value.trim(),n=m.n.value.trim();if(!k||!n)return msg('Kode dan nama barang wajib diisi.',1);if(!CAN)return msg('Akun Anda hanya bisa melihat.',1);
+  try{await addItem(k,{n,g:m.g.value,p:+m.p.value||0,y:+m.y.value||0});ME={k:'',n:'',g:'MAB05',p:'',y:''};render();msg('Item tersimpan.')}catch(er){msg('Gagal menyimpan ('+(er.code||er.message)+').',1)}};
+ document.querySelectorAll('[data-me]').forEach(b=>b.onclick=()=>{const k=b.dataset.me,i=S.items[k];ME={k,n:i.n,g:i.g,p:i.p||'',y:i.y||''};render();try{window.scrollTo(0,0)}catch(e){}});
+ const rmx=$('#rm');if(rmx){rmx.onchange=()=>{RM=rmx.value;render()};const rsx=$('#rs');rsx.oninput=()=>{RS=rsx.value;const p=rsx.selectionStart;render();const n=$('#rs');n.focus();try{n.setSelectionRange(p,p)}catch(e){}}}
+ const pc=$('#pck');if(pc)pc.oninput=()=>{PK=pc.value;const p=pc.selectionStart;render();const n=$('#pck');n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
+ if(fx){const t0=f?f.k:pc;if(t0){t0.focus();fx=false}}
+ const hi=$('#hq');if(hi)hi.oninput=()=>{hq=hi.value;const p=hi.selectionStart;render();const n=$('#hq');n.focus();n.setSelectionRange(p,p)};
+ document.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{hq=b.dataset.h;render()});
+ const rf=$('#rkf');if(rf)rf.onchange=importRak;
+ document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{sel=sel==b.dataset.r?'':b.dataset.r;render()});
+ const qi=$('#q');if(qi){qi.oninput=()=>{q=qi.value;const p=qi.selectionStart;render();const n=$('#q');n.focus();n.setSelectionRange(p,p)};$('#fs').onchange=e=>{fs=e.target.value;render()}}}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(!b||b.disabled)return;if(!CAN)return alert('Akun Anda hanya bisa melihat.');const id=b.dataset.id,a=b.dataset.act,r={tgl:tod(),k:'',p:0,y:0,ts:Date.now()};
+ try{if(a=='sjok')await put({...r,t:'SJC',x:{sj:id,status:'SELESAI'}});
+  else if(a=='sjdiff'){const c=await uiPrompt('Alasan selisih untuk SJ '+id+' (wajib diisi):');if(!c||!c.trim())return;await put({...r,t:'SJC',x:{sj:id,status:'SELISIH',cat:c.trim()}})}
+  else if(a=='ost')await put({...r,t:'OST',x:{ord:id}});render()}catch(er){alert('Gagal ('+(er.code||er.message)+').')}});
+function render(){window._R=null;const n=Object.keys(S.items).length||S.tx.length||STARTED;nav();document.body.classList.toggle('pet',MODE=='pet');if(n)lists();$('#v').innerHTML=!n?empty():MODE=='pet'?pet():tab=='DASH'?dash():tab=='STOK'?stok():tab=='PETA'?peta():tab=='LAP'?lap():tab=='REG'?reg():tab=='MST'?mst():tab=='ACC'?acc():tab=='LBL'?lbl():tab=='SET'?setg():stage(tab);bind()}
+function dlist(){$('#dl').innerHTML=Object.keys(S.items).map(k=>`<option value="${esc(k)}">`).join('')}
+$('#file').onchange=async e=>{const fl=e.target.files[0];if(!fl)return;if(!(await guard())){e.target.value='';return}if(S.tx.length&&!(await uiConfirm('Impor akan mengganti stok awal. Catatan transaksi tetap disimpan. Lanjutkan?')))return;
+ try{const wb=XLSX.read(await fl.arrayBuffer(),{type:'array'}),ws=wb.Sheets['INVENTORY_CONTROL'];if(!ws)throw 0;
+  const r=XLSX.utils.sheet_to_json(ws,{header:1,defval:null}),it={};
+  for(let i=5;i<r.length;i++){const w=r[i];if(!w[0])continue;it[String(w[0]).trim()]={n:w[1]||'',g:w[2]||'',p:+w[25]||0,y:+w[26]||0}}
+  if(!Object.keys(it).length)throw 0;
+  if(DB){if(!CAN)throw{code:'tidak punya hak ubah'};setSync('Mengunggah item\u2026','W');const rows=Object.entries(it).map(([k,v])=>[k,v.n,v.g,v.p,v.y]),n=Math.ceil(rows.length/800);for(let c=0;c<n;c++)await DB.doc('items/c'+c).set({m:rows.slice(c*800,(c+1)*800)});const old=await DB.collection('items').get();for(const d of old.docs)if(+d.id.slice(1)>=n)await DB.doc('items/'+d.id).delete();setSync('Data bersama, tersambung','OK')}else{S.items=it;save();dlist()}tab='DASH';render()}catch(x){if(DB)setSync('Data bersama, tersambung','OK');alert(x&&x.code?'Gagal mengunggah ke penyimpanan bersama ('+x.code+').':'File tidak dikenali. Pilih Inventory_Control_per_Item.xlsx yang memuat sheet INVENTORY_CONTROL.')}e.target.value=''};
+$('#exp').onclick=()=>{if(!Object.keys(S.items).length)return alert('Belum ada data untuk diunduh.');const a=agg(),wb=XLSX.utils.book_new();
+ const st=Object.keys(S.items).map(k=>{const m=met(k,a),i=S.items[k];return{'Kode Barang':k,'Nama Barang':i.n,Gudang:i.g,'Saldo Rill Pcs':m.saldo[0],'Saldo Rill Yard':m.saldo[1],'Belum di Rak Pcs':m.belum[0],'Belum di Rak Yard':m.belum[1],'Terpotong Sementara Pcs':m.sem[0],'Terpotong Sementara Yard':m.sem[1],'Menunggu Checker Pcs':m.wchk[0],'Menunggu Muat Pcs':m.wmu[0],'Tersedia Pcs':m.atp[0],'Tersedia Yard':m.atp[1],Rak:rackOf(k),Status:m.st[0]}});
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(st),'STOK');
+ const sj=[];for(const j of Object.values(sjData()))for(const[k,l]of Object.entries(j.L))sj.push({'No SJ':j.sj,Supplier:j.pihak,Status:j.st,'Kode Barang':k,'Nama Barang':S.items[k]?.n,'SJ Pcs':l.sp,'SJ Yard':l.sy,'Diterima Pcs':l.rp,'Diterima Yard':l.ry,'Selisih Pcs':l.rp-l.sp,'Selisih Yard':+(l.ry-l.sy).toFixed(2),Catatan:j.cat});
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(sj),'CEK_SJ');
+ for(const t in TABS){const d=S.tx.filter(x=>x.t==t).map(x=>({Tanggal:x.tgl,'Kode Barang':x.k,'Nama Barang':S.items[x.k]?.n,Pcs:x.p,Yard:x.y,...Object.fromEntries(TABS[t].f.map(f=>[f.l,x.x[f.k]]))}));XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(d),TABS[t].l.slice(2).replace(/[ \/&]+/g,'_').toUpperCase().slice(0,31))}
+ const all=S.tx.filter(x=>TABS[x.t]).map(x=>({Tanggal:x.tgl,Tahap:TABS[x.t].l,'Kode Barang':x.k,'Nama Barang':S.items[x.k]?.n,Pcs:x.p,Yard:x.y,'No SJ':x.x.sj||'','No Order':x.x.ord||'',Rak:x.t=='MOV'?(x.x.dari+' > '+x.x.rak):(x.x.rak||''),Petugas:x.x.petugas||''}));XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(S.tx.filter(x=>x.t=='ORDX').map(x=>({Tanggal:x.tgl,'No Order':x.x.ord,Alasan:x.x.alasan,Pembatal:x.x.pembatal||''}))),'PEMBATALAN');
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(S.tx.filter(x=>x.t=='ACC').map(x=>({Tanggal:x.tgl,'No Order':x.x.ord,Status:x.x.status,'No Bukti Bayar':x.x.bukti||'',Nominal:x.x.nominal||'',Penyetuju:x.x.penyetuju||'',Catatan:x.x.cat||''}))),'PERSETUJUAN');
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(all),'RIWAYAT');
+ XLSX.writeFile(wb,'WMS_export_'+tod()+'.xlsx')};
+$('#rst').onclick=async()=>{if(!(await guard()))return;if(!(await uiConfirm('Hapus SEMUA item dan transaksi'+(DB?' untuk semua pengguna':' di browser ini')+'? Unduh Excel dulu bila perlu.')))return;try{if(DB){if(!CAN)return alert('Akun Anda tidak bisa menghapus.');for(const c of['items','master','tx','foto']){const sn=await DB.collection(c).get();for(const d of sn.docs)await DB.doc(c+'/'+d.id).delete()}}else{S={items:{},tx:[],seq:1};save();dlist();try{indexedDB.deleteDatabase('wms_foto')}catch(e){}}tab='DASH';render()}catch(er){alert('Gagal menghapus ('+(er.code||er.message)+').')}};
+$('#mpet').onclick=()=>setMode('pet');
+try{if(location.hash=='#petugas'){MODE='pet';tab='HOME'}}catch(e){}
+if(typeof addEventListener!='undefined')addEventListener('hashchange',()=>{const m=location.hash=='#petugas'?'pet':'adm';if(m!=MODE){MODE=m;tab=m=='pet'?'HOME':'DASH';render()}});
+load();dlist();render();initDb();
+</script>
+</body>
+</html>
