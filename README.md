@@ -24,7 +24,7 @@
    Key publik memang dipakai browser; keamanan data ditegakkan oleh Row Level Security. Jangan pernah menaruh `service_role` key atau password di file ini.
 6. Di **Database → Publications/Realtime**, aktifkan Realtime untuk tabel `wms_docs`.
 7. Daftarkan akun staf di Authentication → Users. Untuk setiap user, tambahkan satu baris `wms_users` dengan UUID yang sama dan role `operator` atau `viewer`. Admin dapat mengelola peran lewat SQL Editor atau Table Editor.
-8. Di repository GitHub, buka **Settings → Pages** dan pilih **GitHub Actions** sebagai Build and deployment source. Workflow di `.github/workflows/pages.yml` akan deploy otomatis setiap ada push ke branch `main`.
+8. Workflow di `.github/workflows/pages.yml` akan mengaktifkan GitHub Pages dan deploy otomatis setiap ada push ke branch `main`.
 9. URL GitHub Pages untuk repository ini adalah `https://reiw09.github.io/WMS/`. Di Supabase, buka **Authentication → URL Configuration**, atur Site URL ke URL tersebut dan tambahkan ke Redirect URLs agar reset password berfungsi.
 
 ## Peran
