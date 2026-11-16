@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./supabase-config.js"></script>
 <style>
 :root{--bg:#f2f3ef;--card:#fff;--ink:#16202e;--mute:#667085;--line:#dcdfd6;--acc:#1f4e79;--kraft:#b9803a;--ok:#2f7d4f;--warn:#a96a00;--bad:#b3261e;--okbg:#e2f1e7;--warnbg:#fbeccb;--badbg:#f9dcd9;--infobg:#dde8f3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12171f;--card:#1b222d;--ink:#e8ebf0;--mute:#9aa4b2;--line:#2c3644;--acc:#7fb2e5;--kraft:#d9a15a;--ok:#6fcf97;--warn:#f2c14e;--bad:#ff8a80;--okbg:#1d3a2a;--warnbg:#3d3213;--badbg:#42201d;--infobg:#1d3047;color-scheme:dark}}
@@ -64,12 +66,64 @@ body.pet [data-acc=batal]{display:none}
 .phg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:6px}.pv img{max-height:56px;margin-top:4px;border-radius:4px;display:block}
 .fgal{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fgal img{width:100%;border-radius:6px;border:1px solid var(--line)}.fgal figcaption{font-size:12px;color:var(--mute);margin-bottom:3px}.fgal figure{margin:0}
 #f.chk>label:has([name=cari]){order:-3}#f.chk>label:has([name=ord]){order:-2}#f.chk>label:has([name=k]),#f.chk>label:has([name=p]),#f.chk>label:has([name=y]){order:-1}#f.chk>label:first-child{order:1}#f.chk>button.p{order:2}
+header{padding:14px max(16px,calc((100vw - 1240px)/2));gap:14px}
+header .brand{display:flex;align-items:center;gap:12px;min-width:240px;flex:1}
+header h1{font-size:19px;letter-spacing:-.02em}
+header .tools{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+header .import-label{display:flex;flex-direction:column;gap:3px;color:inherit;font-size:11px;font-weight:600}
+header .import-label input{width:250px;max-width:100%;font-size:12px;padding:4px;background:var(--card);color:var(--ink)}
+header button{padding:8px 12px;white-space:nowrap}
+nav{flex-wrap:wrap;justify-content:center;padding:0 max(8px,calc((100vw - 1240px)/2));box-shadow:0 2px 6px rgba(16,24,40,.05)}
+nav button{padding:10px 11px;font-size:13px}
+nav button:hover{background:var(--bg);color:var(--ink)}
+nav button.on{background:var(--infobg)}
+main{max-width:1280px;padding:24px}
+.card{border-radius:10px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.035)}
+h2{font-size:17px;letter-spacing:-.01em}
+button,.btn{transition:background-color .15s ease,border-color .15s ease,transform .15s ease}
+button:not(:disabled):hover{border-color:var(--kraft)}
+button.p:not(:disabled):hover{filter:brightness(.96)}
+.welcome{max-width:880px;margin:clamp(24px,8vh,80px) auto;padding:clamp(22px,5vw,42px)}
+.welcome .eyebrow{margin:0 0 8px;color:var(--kraft);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.welcome h2{font-size:clamp(22px,3vw,30px);margin-bottom:8px}
+.welcome .intro{max-width:650px;color:var(--mute);font-size:15px;line-height:1.6;margin:0}
+.welcome .start{display:flex;align-items:center;gap:14px;margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
+.welcome .start button{padding:10px 16px}
+.welcome .note{margin:18px 0 0;padding:12px 14px;border-radius:8px;background:var(--bg);color:var(--mute);font-size:12.5px}
+.kpi{padding:18px}
+.kpi b{font-size:24px}
+@media(max-width:760px){
+ header{padding:12px 14px;align-items:flex-start}
+ header .brand{flex-wrap:wrap;gap:6px;min-width:0}
+ header h1{flex-basis:100%}
+ header .tools{justify-content:flex-start;width:100%}
+ header .import-label{order:1}
+ nav{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;padding:0 8px}
+ nav button{flex:none}
+ main{padding:14px}
+ .card{padding:14px}
+ .welcome{margin:16px auto;padding:22px}
+ .welcome .start{align-items:flex-start;flex-direction:column}
+}
+@media(min-width:761px) and (max-width:1000px){header .brand{flex-basis:100%}}
+body.auth-required header .tools,body.auth-required nav{display:none}
+.auth-shell{min-height:calc(100vh - 76px);display:grid;place-items:center;padding:24px}
+.auth-card{width:min(100%,440px);padding:28px}
+.auth-card h2{font-size:23px;margin-bottom:6px}
+.auth-card>p{color:var(--mute)}
+.auth-card form{grid-template-columns:1fr;margin-top:20px}
+.auth-card .auth-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.auth-card .auth-status{min-height:20px;margin-top:12px;color:var(--bad);font-size:13px}
+.auth-card .auth-status.good{color:var(--ok)}
+.auth-card .setup-steps{padding:12px 14px;border-radius:8px;background:var(--bg);font-size:13px}
+.auth-card .setup-steps li+li{margin-top:7px}
+body.auth-required #rst{display:none}
 </style>
 </head>
 <body>
-<header><h1>WMS Gudang Kain</h1><span id="sync" class="tag I">Memuat…</span>
-<label style="color:inherit;flex-direction:row;align-items:center;gap:6px">Impor Inventory Control (.xlsx)<input id="file" type="file" accept=".xlsx" style="width:200px"></label>
-<button id="mpet">Mode Petugas</button><button id="exp">Unduh Excel</button><button id="rst">Hapus data</button></header>
+<header><div class="brand"><h1>WMS Gudang Kain</h1><span id="sync" class="tag I">Memuat…</span></div>
+<div class="tools"><span id="account" class="hint" hidden></span><label class="import-label">Impor Inventory Control (.xlsx)<input id="file" type="file" accept=".xlsx"></label>
+<button id="mpet">Mode Petugas</button><button id="exp">Unduh Excel</button><button id="rst">Hapus data</button><button id="logout" hidden>Keluar</button></div></header>
 <nav id="nav"></nav>
 <main id="v"></main>
 <datalist id="dl"></datalist><datalist id="dsj"></datalist><datalist id="dord"></datalist><datalist id="dpo"></datalist>
@@ -85,18 +139,130 @@ function save(){if(DB)return;try{localStorage.setItem(KEY,JSON.stringify(S))}cat
 function msg(t,bad){const m=$('#msg');if(m){m.textContent=t;m.className=bad?'err':'good'}}
 function setSync(t,c){const e=$('#sync');if(e){e.textContent=t;e.className='tag '+(c||'I')}}
 const rid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const HOSTED=location.protocol!='file:',SUPABASE_CONFIG=window.WMS_SUPABASE_CONFIG||null;
+const SUPABASE_CONFIGURED=!!(SUPABASE_CONFIG&&SUPABASE_CONFIG.url&&SUPABASE_CONFIG.anonKey);
+let AUTH_USER=null,AUTH_READY=false,AUTH_ERROR='',ROLE='',IS_ADMIN=false,SUPABASE_CLIENT=null,SUPABASE_AUTH=null,WATCHERS=[],AUTH_VERSION=0;
 async function put(rec){if(DB){await DB.collection('tx').doc(rid()).set(rec)}else{S.tx.push({...rec,id:S.seq++});save()}}
 async function delTx(id){if(DB){await DB.doc('tx/'+id).delete()}else{S.tx=S.tx.filter(t=>t.id!=id);save()}}
 function rr(){const a=document.activeElement;if(a&&a.closest&&a.closest('#f,.pf')&&a.value){pend=true;return}render()}
 document.addEventListener('focusout',()=>setTimeout(()=>{const a=document.activeElement;if(pend&&!(a&&a.closest&&a.closest('#f,.pf'))){pend=false;render()}},60));
 async function initDb(){
- try{if(typeof claude==='undefined')throw 0;DB=await claude.use('db');const u=await claude.use('user');if(DB&&u&&(await u.can('data.write'))===false)CAN=false}catch(e){DB=null}
- if(!DB){setSync('Mode lokal: data hanya di browser ini','W');return}
- setSync(CAN?'Data bersama, tersambung':'Hanya baca','OK');
- DB.collection('items').onSnapshot(sn=>{const it={};sn.docs.forEach(d=>(d.data().m||[]).forEach(r=>{it[r[0]]={n:r[1],g:r[2],p:r[3],y:r[4]}}));IMP=it;mergeItems()},e=>setSync('Gagal memuat item ('+e.code+')','B'));
- DB.collection('master').onSnapshot(sn=>{const m={};sn.docs.forEach(d=>{const v=d.data();if(v&&v.k)m[v.k]={n:v.n,g:v.g,p:+v.p||0,y:+v.y||0}});MAN=m;mergeItems()},e=>setSync('Gagal memuat master ('+e.code+')','B'));
- DB.collection('cfg').onSnapshot(sn=>{sn.docs.forEach(d=>{if(d.id=='main'&&d.data().tol!=null){TOL=+d.data().tol;rr()}if(d.id=='pin'){PINH=d.data().h||'';rr()}})},e=>{});
- DB.collection('tx').onSnapshot(sn=>{S.tx=sn.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>(a.ts||0)-(b.ts||0));rr()},e=>setSync('Gagal memuat transaksi ('+e.code+')','B'))}
+ if(!HOSTED){setSync('Mode lokal: data hanya di browser ini','W');return}
+ TOL=0.01;PINH='';
+ if(!SUPABASE_CONFIGURED){setSync('Supabase belum dikonfigurasi','W');render();return}
+ if(!window.supabase){AUTH_ERROR='Supabase SDK gagal dimuat. Periksa koneksi internet atau pemblokir konten.';AUTH_READY=true;setSync('Gagal memuat Supabase','B');render();return}
+ try{
+  SUPABASE_CLIENT=window.supabase.createClient(SUPABASE_CONFIG.url,SUPABASE_CONFIG.anonKey);
+  DB=createSupabaseAdapter(SUPABASE_CLIENT);
+  SUPABASE_AUTH={
+   onAuthStateChanged(callback){return SUPABASE_CLIENT.auth.onAuthStateChange((_event,session)=>setTimeout(()=>callback(session?.user||null),0))},
+   signInWithEmailAndPassword(email,password){return SUPABASE_CLIENT.auth.signInWithPassword({email,password})},
+   sendPasswordResetEmail(email){return SUPABASE_CLIENT.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname})},
+   signOut(){return SUPABASE_CLIENT.auth.signOut()}
+  };
+ }catch(e){AUTH_ERROR='Konfigurasi Supabase tidak valid: '+(e.message||e);AUTH_READY=true;setSync('Konfigurasi Supabase salah','B');render();return}
+ setSync('Memeriksa login…','I');render();
+ SUPABASE_AUTH.onAuthStateChanged(user=>handleAuth(user));
+}
+async function handleAuth(user){
+ const version=++AUTH_VERSION;
+ stopWatches();AUTH_USER=user;ROLE='';IS_ADMIN=false;CAN=false;AUTH_ERROR='';S={items:{},tx:[],seq:1};IMP={};MAN={};
+ if(!user){AUTH_READY=true;setSync('Belum login','W');render();return}
+ AUTH_READY=false;setSync('Memeriksa hak akses…','I');render();
+ try{
+  const {data:profile,error}=await SUPABASE_CLIENT.from('wms_users').select('role').eq('id',user.id).maybeSingle();
+  if(version!=AUTH_VERSION)return;
+  if(error)throw error;
+  ROLE=profile?profile.role:'';
+  if(!['admin','operator','viewer'].includes(ROLE)){ROLE='';throw new Error('Akun belum diberi peran. Minta admin mendaftarkan akun ini sebagai operator atau viewer.')}
+  IS_ADMIN=ROLE=='admin';CAN=IS_ADMIN||ROLE=='operator';AUTH_READY=true;
+  setSync(CAN?'Data bersama, tersambung':'Hanya lihat','OK');watchData();
+ }catch(e){if(version!=AUTH_VERSION)return;AUTH_READY=true;CAN=false;AUTH_ERROR=e.message||'Gagal memeriksa hak akses.';setSync('Akses data gagal','B')}
+ render();
+}
+function createSupabaseAdapter(client){
+ const snap=rows=>({docs:rows.map(row=>({id:row.id,data:()=>row.data}))});
+ const fetchCollection=async collection=>{
+  const {data,error}=await client.from('wms_docs').select('id,data').eq('collection',collection);
+  if(error)throw error;
+  return snap(data||[]);
+ };
+ const docRef=(collection,id)=>({
+  async set(data){
+   const {error}=await client.from('wms_docs').upsert({collection,id,data},{onConflict:'collection,id'});
+   if(error)throw error;
+  },
+  async get(){
+   const {data,error}=await client.from('wms_docs').select('data').eq('collection',collection).eq('id',id).maybeSingle();
+   if(error)throw error;
+   return{exists:!!data,data:()=>data&&data.data};
+  },
+  async delete(){
+   const {error}=await client.from('wms_docs').delete().eq('collection',collection).eq('id',id);
+   if(error)throw error;
+  }
+ });
+ return{
+  collection(collection){
+   return{
+    doc:id=>docRef(collection,id),
+    get:()=>fetchCollection(collection),
+    onSnapshot(next,error){
+     let active=true,refreshing=false,queued=false;
+     const refresh=async()=>{
+      if(!active)return;
+      if(refreshing){queued=true;return}
+      refreshing=true;
+      try{next(await fetchCollection(collection))}
+      catch(e){if(active)error(e)}
+      finally{refreshing=false;if(queued){queued=false;refresh()}}
+     };
+     const channel=client.channel('wms-'+collection+'-'+rid()).on('postgres_changes',
+      {event:'*',schema:'public',table:'wms_docs',filter:'collection=eq.'+collection},refresh)
+      .subscribe(status=>{if(active&&(status=='CHANNEL_ERROR'||status=='TIMED_OUT'))error(new Error('Realtime status: '+status))});
+     refresh();
+     return()=>{active=false;client.removeChannel(channel)}
+    }
+   }
+  },
+  doc(path){const i=path.indexOf('/');return docRef(path.slice(0,i),path.slice(i+1))}
+ };
+}
+function stopWatches(){WATCHERS.forEach(stop=>stop());WATCHERS=[]}
+function watchData(){
+ const watch=(path,next,label)=>WATCHERS.push(DB.collection(path).onSnapshot(next,e=>setSync('Gagal memuat '+label+' ('+(e.code||e.message)+')','B')));
+ watch('items',sn=>{const it={};sn.docs.forEach(d=>(d.data().m||[]).forEach(r=>{it[r[0]]={n:r[1],g:r[2],p:r[3],y:r[4]}}));IMP=it;mergeItems()},'inventory');
+ watch('master',sn=>{const m={};sn.docs.forEach(d=>{const v=d.data();if(v&&v.k)m[v.k]={n:v.n,g:v.g,p:+v.p||0,y:+v.y||0}});MAN=m;mergeItems()},'master barang');
+ watch('cfg',sn=>{sn.docs.forEach(d=>{if(d.id=='main'&&d.data().tol!=null){TOL=+d.data().tol;rr()}if(d.id=='pin'){PINH=d.data().h||'';rr()}})},'pengaturan');
+ watch('tx',sn=>{S.tx=sn.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>(a.ts||0)-(b.ts||0));rr()},'transaksi');
+}
+function authError(e){
+ const m=e.message||'';
+ if(e.code=='invalid_credentials'||/invalid login credentials/i.test(m))return'Email atau password salah.';
+ if(e.code=='email_not_confirmed')return'Email belum dikonfirmasi.';
+ if(e.code=='user_banned')return'Akun ini dinonaktifkan.';
+ if(e.code=='over_request_rate_limit'||e.code=='too_many_requests')return'Terlalu banyak percobaan. Coba lagi nanti.';
+ if(e.code=='weak_password')return'Password minimal 6 karakter.';
+ if(e.code=='email_exists')return'Email ini sudah terdaftar.';
+ if(e.code=='network_error'||/fetch failed/i.test(m))return'Tidak dapat terhubung. Periksa internet Anda.';
+ return m||'Proses login gagal.';
+}
+function authView(){
+ if(!SUPABASE_CONFIGURED)return`<div class="auth-shell"><section class="card auth-card"><p class="eyebrow">WMS GUDANG KAIN</p><h2>Web belum tersambung</h2><p>Konfigurasi Supabase belum diisi. Data bersama tidak diaktifkan agar transaksi tidak tersimpan diam-diam di browser masing-masing.</p><ol class="setup-steps"><li>Buat project Supabase dan jalankan <b>supabase-setup.sql</b>.</li><li>Isi URL project dan anon/public key di <b>supabase-config.js</b>.</li><li>Deploy website statis dan aktifkan Realtime untuk tabel <b>wms_docs</b>.</li></ol><p class="hint">Aplikasi lokal tetap bisa digunakan dengan membuka file HTML langsung.</p></section></div>`;
+ if(!AUTH_READY)return`<div class="auth-shell"><section class="card auth-card"><h2>Memeriksa akses…</h2><p>Mohon tunggu sebentar.</p></section></div>`;
+ if(AUTH_USER&&!ROLE)return`<div class="auth-shell"><section class="card auth-card"><h2>Akses belum diberikan</h2><p>${esc(AUTH_ERROR||'Akun ini belum terdaftar pada WMS.')}</p><p class="hint">Email: ${esc(AUTH_USER.email||'')}</p><div class="auth-actions"><button id="signout">Keluar</button></div></section></div>`;
+ if(AUTH_USER)return`<div class="auth-shell"><section class="card auth-card"><h2>Gagal membuka WMS</h2><p class="auth-status">${esc(AUTH_ERROR||'Gagal memuat data bersama.')}</p><button id="signout">Keluar</button></section></div>`;
+ return`<div class="auth-shell"><section class="card auth-card"><p class="eyebrow">WMS GUDANG KAIN</p><h2>Masuk ke WMS</h2><p>Gunakan akun yang telah didaftarkan oleh admin.</p><form id="login-form"><label>Email<input name="email" type="email" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><div class="auth-actions"><button class="p" type="submit">Masuk</button><button id="reset-password" type="button">Lupa password</button></div></form><p id="auth-status" class="auth-status" role="status">${esc(AUTH_ERROR)}</p></section></div>`;
+}
+function bindAuth(){
+ const form=$('#login-form');
+ if(form)form.onsubmit=async e=>{e.preventDefault();const email=form.email.value.trim(),password=form.password.value,status=$('#auth-status');status.textContent='Memeriksa akun…';status.className='auth-status';
+  try{const{error}=await SUPABASE_AUTH.signInWithEmailAndPassword(email,password);if(error)throw error}catch(x){status.textContent=authError(x);status.className='auth-status'}}
+ const reset=$('#reset-password');
+ if(reset)reset.onclick=async()=>{const email=$('#login-form').email.value.trim();if(!email){$('#auth-status').textContent='Isi email terlebih dahulu.';return}
+  try{const{error}=await SUPABASE_AUTH.sendPasswordResetEmail(email);if(error)throw error;$('#auth-status').textContent='Link reset password telah dikirim ke email.';$('#auth-status').className='auth-status good'}catch(e){$('#auth-status').textContent=authError(e)}};
+ const out=$('#signout')||$('#logout');if(out)out.onclick=async()=>{try{const{error}=await SUPABASE_AUTH.signOut();if(error)throw error}catch(e){AUTH_ERROR=authError(e);render()}}
+}
 const F=(k,l,r,x)=>({k,l,r,...x});
 const TABS={
  SJ:{l:'1 Inbound (SJ)',f:[F('sj','No. surat jalan',1),F('pihak','Suppliers',1),F('desc','Description'),F('partai','No. Partai'),F('pl','Link packing list'),F('month','Month',0,{ro:1}),F('petugas','PIC team inbound')]},
@@ -161,7 +327,7 @@ function chk(t,k,p,y,x){const J=sjData(),O=ordData(),a=agg(),R=rackData(),ck=r=>
 function nav(){$('#nav').innerHTML=[['DASH','Ringkasan'],['STOK','Stok per item'],['MST','Master barang'],['REG','Register inbound'],['PETA','Peta rak'],['LAP','Riwayat & laporan'],['LBL','Label & barcode'],['SET','Pengaturan'],...Object.entries(TABS).flatMap(([k,v])=>k=='CHK'?[[k,v.l],['ACC','6 Persetujuan bayar']]:[[k,v.l]])].map(([k,l])=>`<button class="${tab==k?'on':''}" data-t="${k}">${l}</button>`).join('');
  document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;q='';fs='';render()})}
 function lists(){const J=sjData(),O=ordData(),o=x=>Object.keys(x).map(k=>`<option value="${esc(k)}">`).join('');$('#dsj').innerHTML=o(J);$('#dord').innerHTML=o(O);$('#dpo').innerHTML=Object.values(O).filter(r=>r.closed&&!r.batal).flatMap(r=>[r.po,r.pl].filter(Boolean).map(v=>`<option value="${esc(v)}">${esc(r.ord)} · ${esc(r.pihak||'')}</option>`)).join('')}
-function empty(){return`<div class="card"><h2>Mulai</h2><p>Pilihan 1: klik <b>Impor Inventory Control (.xlsx)</b> di atas untuk memuat ribuan item sekaligus. Pilihan 2: <b>mulai tanpa impor</b>. Item didaftarkan otomatis saat Anda mencatat inbound di tab 1, atau manual di menu Master barang.</p><p><button class="p" id="mulai" type="button">Mulai tanpa impor</button></p><p class="hint">Data dibagi ke semua pengguna yang membuka halaman ini dengan hak ubah. Jika koneksi bersama gagal, data hanya tersimpan di browser ini. Unduh Excel secara berkala sebagai cadangan.</p></div>`}
+function empty(){return`<section class="card welcome"><p class="eyebrow">Warehouse Management</p><h2>Siapkan gudang Anda</h2><p class="intro">Mulai dengan mengimpor daftar inventory atau catat barang masuk secara langsung. Item baru juga bisa didaftarkan nanti melalui menu Master barang.</p><div class="start"><button class="p" id="mulai" type="button">Mulai tanpa impor</button><span class="hint">Untuk memuat inventory yang sudah ada, gunakan Impor Inventory Control di bagian atas.</span></div><p class="note">${DB?'Data tersimpan bersama dan dapat diakses pengguna yang memiliki hak ubah. Unduh Excel secara berkala sebagai cadangan.':'Mode lokal aktif: data hanya tersimpan di browser ini. Unduh Excel secara berkala sebagai cadangan.'}</p></section>`}
 const TB=(h,rows,empt)=>`<div class="tw"><table><tr>${h.map(x=>`<th${x[0]=='#'?' class="n"':''}>${x.replace(/^#/,'')}</th>`).join('')}</tr>${rows||`<tr><td colspan="${h.length}" class="hint">${empt||'Belum ada data.'}</td></tr>`}</table></div>`;
 const nm=k=>esc(S.items[k]?.n);
 function dash(){const a=agg(),ks=Object.keys(S.items),T={saldo:[0,0],belum:[0,0],sem:[0,0],wchk:[0,0],wmu:[0,0]};let minus=0;
@@ -293,9 +459,9 @@ async function shrink(file){const u=URL.createObjectURL(file);const im=await new
  let sc=Math.min(1,1024/Math.max(im.naturalWidth,im.naturalHeight)),q=0.7,blob;
  for(let n=0;n<6;n++){const c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.naturalWidth*sc));c.height=Math.max(1,Math.round(im.naturalHeight*sc));c.getContext('2d').drawImage(im,0,0,c.width,c.height);blob=await new Promise(r=>c.toBlob(r,'image/jpeg',q));if(blob&&blob.size<=140000)break;q=Math.max(0.4,q-0.1);sc*=0.85}
  URL.revokeObjectURL(u);return blob}
-async function fotoSave(blob,meta){try{if(typeof claude!=='undefined'){const A=await claude.use('assets');if(A){const r=await A.upload(blob);return'a:'+r.id}}}catch(e){}
+async function fotoSave(blob,meta){
  const d=await new Promise((a,b)=>{const r=new FileReader();r.onload=()=>a(r.result);r.onerror=()=>b(r.error);r.readAsDataURL(blob)});const id=rid();await fSet(id,{d,...meta,ts:Date.now()});return'i:'+id}
-async function fotoUrl(ref){if(ref.startsWith('a:'))return'/_blob/'+ref.slice(2);const v=await fGet(ref.slice(2));return v&&v.d||''}
+async function fotoUrl(ref){const v=await fGet(ref.slice(2));return v&&v.d||''}
 const fotoBtn=(m,t)=>m&&typeof m=='object'&&Object.keys(m).length?`<button data-fo="${esc(JSON.stringify(m))}" data-ft="${esc(t||'')}">Foto (${Object.keys(m).length})</button>`:'';
 async function showFoto(map,title){const o=document.createElement('div');o.className='ovl';o.innerHTML=`<div class="dlg" style="max-width:640px;max-height:90vh;overflow:auto"><p><b>${esc(title||'Foto')}</b></p><div class="fgal" id="fgal"></div><div class="dbt"><button id="fotox" type="button">Tutup</button></div></div>`;document.body.appendChild(o);o.querySelector('#fotox').onclick=()=>o.remove();o.onclick=e=>{if(e.target==o)o.remove()};
  const g=o.querySelector('#fgal');for(const[k,l]of FK){const ref=map[k];if(!ref)continue;const fig=document.createElement('figure'),cap=document.createElement('figcaption'),im=document.createElement('img');cap.textContent=l;fig.append(cap,im);g.appendChild(fig);try{im.src=await fotoUrl(ref)}catch(e){cap.textContent=l+' (gagal dimuat)'}}if(!g.children.length)g.textContent='Tidak ada foto.'}
@@ -327,7 +493,7 @@ async function importRak(e){const fl=e.target.files[0];if(!fl)return;if(!CAN)ret
 function stage(t){const T=TABS[t];
  const fld=T.f.map(f=>f.rk?rkF(f,t):f.o?selF(f):f.ph?phF(f):`<label>${f.l}<input name="${f.k}" value="${f.ro?'':esc(f.k=='petugas'&&NAME?NAME:(LAST[f.k]||''))}" ${f.k=='sj'?'list="dsj"':f.k=='ord'?'list="dord"':f.k=='cari'?'list="dpo"':''} ${f.ro?'readonly':''} ${f.r?'required':''} autocomplete="off"></label>`).join('');
  const list=S.tx.filter(x=>x.t==t).slice(MODE=='pet'?-5:-100).reverse(),cols=T.f.map(f=>f.k);
- const rows=list.map(x=>`<tr><td>${x.tgl}</td><td>${esc(x.k)}</td><td>${nm(x.k)}</td><td class="n">${nf(x.p)}</td><td class="n">${nf(x.y,1)}</td>${cols.map(c=>`<td>${c=='foto'?fotoBtn(x.x.foto,x.x.sj):lk(x.x[c])}</td>`).join('')}<td><button data-d="${x.id}">Hapus</button></td></tr>`).join('');
+ const rows=list.map(x=>`<tr><td>${x.tgl}</td><td>${esc(x.k)}</td><td>${nm(x.k)}</td><td class="n">${nf(x.p)}</td><td class="n">${nf(x.y,1)}</td>${cols.map(c=>`<td>${c=='foto'?fotoBtn(x.x.foto,x.x.sj):lk(x.x[c])}</td>`).join('')}<td>${!HOSTED||IS_ADMIN?`<button data-d="${x.id}">Hapus</button>`:''}</td></tr>`).join('');
  return`<div class="card"><h2>${T.l}</h2><form id="f"${t=='CHK'?' class="chk"':''}><label>Tanggal<input type="date" name="tgl" value="${tod()}" required></label>${t=='CHK'?'<label>Item hasil picking<select name="k" required><option value="">Cari No. PO / Packing list dulu</option></select></label>':'<label>Kode barang<input name="k" list="dl" required autocomplete="off"></label>'}<label>Pcs${t=='CHK'?' (otomatis)':''}<input name="p" type="number" min="0" step="1" required ${t=='CHK'?'readonly':''}></label><label>Yard${t=='CHK'?' (otomatis)':''}<input name="y" type="number" min="0" step="0.01" required ${t=='CHK'?'readonly':''}></label>${fld}<button class="p">Simpan</button></form><p class="hint" id="nm"></p><p class="hint">${HELP[t]}</p><div id="msg"></div></div>${PANEL[t]?PANEL[t]():''}
  <div class="card"><h2>Catatan terakhir</h2>${TB(['Tanggal','Kode','Nama','#Pcs','#Yard',...T.f.map(f=>f.l),''],rows,'Belum ada catatan.')}</div>`}
 function bind(){const f=$('#f');
@@ -345,13 +511,13 @@ function bind(){const f=$('#f');
    if(!CAN)return msg('Akun Anda hanya bisa melihat, tidak bisa menyimpan.',1);const keep=f.tgl.value;
    try{if(isNew)await addItem(k,{n:x.desc.trim(),g:'MAB05',p:0,y:0});const pf=FK.map(([kk])=>[kk,f['foto_'+kk]&&f['foto_'+kk].files[0]]).filter(([,fl])=>fl);if(pf.length){msg('Mengunggah '+pf.length+' foto…');const fo={};for(const[kk,fl]of pf)fo[kk]=await fotoSave(await shrink(fl),{k,kind:kk,sj:x.sj});x.foto=fo}await put({t:tab,tgl:keep,k,p,y,x,ts:Date.now()})}catch(er){return msg('Gagal menyimpan ('+(er.code||er.message)+').',1)}
    ['sj','ord','pihak','petugas','truk','po','pl','cari'].forEach(c=>{if(x[c]!==undefined)LAST[c]=x[c]});fx=true;render();$('#f').tgl.value=keep;msg(isNew?'Tersimpan. Kode baru otomatis masuk master barang.':'Tersimpan.')}}
- document.querySelectorAll('[data-d]').forEach(b=>b.onclick=async()=>{if(!CAN)return alert('Akun Anda tidak bisa menghapus.');if(await uiConfirm('Hapus catatan ini? Hasil perhitungan stok dan status akan ikut berubah.')){try{await delTx(b.dataset.d);render()}catch(er){alert('Gagal menghapus ('+(er.code||er.message)+').')}}});
+ document.querySelectorAll('[data-d]').forEach(b=>b.onclick=async()=>{if(HOSTED&&!IS_ADMIN)return alert('Hanya admin yang dapat menghapus catatan.');if(!CAN)return alert('Akun Anda tidak bisa menghapus.');if(await uiConfirm('Hapus catatan ini? Hasil perhitungan stok dan status akan ikut berubah.')){try{await delTx(b.dataset.d);render()}catch(er){alert('Gagal menghapus ('+(er.code||er.message)+').')}}});
  const pi=$('#pq');if(pi){const upd=()=>{pq=$('#pq').value;PBL=$('#pbl').value;PB=Math.max(1,+$('#pb').value||8);PT=Math.max(1,+$('#pt').value||4);const id=document.activeElement.id,p=document.activeElement.selectionStart;render();const n=id&&$('#'+id);if(n){n.focus();try{n.setSelectionRange(p,p)}catch(e){}}};['pq','pbl','pb','pt'].forEach(i=>$('#'+i).oninput=upd)}
  if(typeof JsBarcode!='undefined')document.querySelectorAll('svg.bc').forEach(s=>{try{JsBarcode(s,s.dataset.c,{format:'CODE128',height:40,displayValue:false,margin:0,width:1.6})}catch(e){}});
- const sv=$('#tolsave');if(sv)sv.onclick=async()=>{if(!(await guard()))return;const v=Math.max(0,+$('#tol').value||0);TOL=v;try{if(DB)await DB.doc('cfg/main').set({tol:v});else localStorage.setItem('wms_tol',String(v));alert('Tersimpan.')}catch(er){alert('Gagal menyimpan ('+(er.code||er.message)+').')}render()};
+ const sv=$('#tolsave');if(sv)sv.onclick=async()=>{if(HOSTED&&!IS_ADMIN)return alert('Hanya admin yang dapat mengubah pengaturan.');if(!(await guard()))return;const v=Math.max(0,+$('#tol').value||0);TOL=v;try{if(DB)await DB.doc('cfg/main').set({tol:v});else localStorage.setItem('wms_tol',String(v));alert('Tersimpan.')}catch(er){alert('Gagal menyimpan ('+(er.code||er.message)+').')}render()};
  document.querySelectorAll('input[data-ph]').forEach(inp=>inp.onchange=()=>{const pv=$('#pv_'+inp.dataset.ph);if(!pv)return;pv.innerHTML='';const fl=inp.files[0];if(fl){const im=document.createElement('img');im.src=URL.createObjectURL(fl);pv.appendChild(im)}});
  const ps=$('#pinsave');if(ps)ps.onclick=async()=>{const old=$('#pold')?$('#pold').value:'',n1=$('#pnew').value,n2=$('#pnew2').value;
-  if(PINH&&(await hpin(old))!==PINH)return alert('PIN lama salah.');if(n1!==n2)return alert('PIN baru dan ulangannya tidak sama.');if(n1&&!/^[0-9]{4,8}$/.test(n1))return alert('PIN harus 4 sampai 8 angka.');if(!CAN)return alert('Akun Anda hanya bisa melihat.');
+  if(HOSTED&&!IS_ADMIN)return alert('Hanya admin yang dapat mengubah PIN.');if(PINH&&(await hpin(old))!==PINH)return alert('PIN lama salah.');if(n1!==n2)return alert('PIN baru dan ulangannya tidak sama.');if(n1&&!/^[0-9]{4,8}$/.test(n1))return alert('PIN harus 4 sampai 8 angka.');if(!CAN)return alert('Akun Anda hanya bisa melihat.');
   const h=n1?await hpin(n1):'';try{if(DB)await DB.doc('cfg/pin').set({h});else localStorage.setItem('wms_pin',h);PINH=h;PINOK=!!h;alert(h?'PIN tersimpan.':'PIN dihapus.');render()}catch(er){alert('Gagal ('+(er.code||er.message)+').')}};
  const as=$('#afs');if(as)as.onclick=async()=>{const m=$('#af'),ord=m.ord.value.trim(),bukti=m.bukti.value.trim(),pen=m.penyetuju.value.trim(),o=ordData()[ord];
   if(!o)return msg('Order tidak ditemukan.',1);if(!o.closed)return msg('Picking order belum diselesaikan.',1);if(o.batal)return msg('Order ini sudah dibatalkan.',1);if(o.acc)return msg('Order ini sudah disetujui.',1);if(o.st=='SELESAI')return msg('Order ini sudah dimuat.',1);
@@ -374,14 +540,27 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-act]
  try{if(a=='sjok')await put({...r,t:'SJC',x:{sj:id,status:'SELESAI'}});
   else if(a=='sjdiff'){const c=await uiPrompt('Alasan selisih untuk SJ '+id+' (wajib diisi):');if(!c||!c.trim())return;await put({...r,t:'SJC',x:{sj:id,status:'SELISIH',cat:c.trim()}})}
   else if(a=='ost')await put({...r,t:'OST',x:{ord:id}});render()}catch(er){alert('Gagal ('+(er.code||er.message)+').')}});
-function render(){window._R=null;const n=Object.keys(S.items).length||S.tx.length||STARTED;nav();document.body.classList.toggle('pet',MODE=='pet');if(n)lists();$('#v').innerHTML=!n?empty():MODE=='pet'?pet():tab=='DASH'?dash():tab=='STOK'?stok():tab=='PETA'?peta():tab=='LAP'?lap():tab=='REG'?reg():tab=='MST'?mst():tab=='ACC'?acc():tab=='LBL'?lbl():tab=='SET'?setg():stage(tab);bind()}
+function render(){
+ window._R=null;const cloudGate=HOSTED;
+ document.body.classList.toggle('auth-required',cloudGate);document.body.classList.toggle('pet',MODE=='pet'&&!cloudGate);
+ if(cloudGate&&(!SUPABASE_CONFIGURED||!AUTH_READY||!AUTH_USER||!ROLE)){
+  $('#nav').innerHTML='';$('#v').innerHTML=authView();bindAuth();$('#account').hidden=true;$('#logout').hidden=true;return
+ }
+ const n=Object.keys(S.items).length||S.tx.length||STARTED;
+ if(cloudGate){
+  $('#account').textContent=(AUTH_USER.email||'')+' · '+({admin:'Admin',operator:'Operator',viewer:'Hanya lihat'}[ROLE]||ROLE);
+  $('#account').hidden=false;$('#logout').hidden=false;
+  document.querySelector('.import-label').hidden=!IS_ADMIN;$('#rst').hidden=!IS_ADMIN;
+ }else{$('#account').hidden=true;$('#logout').hidden=true;document.querySelector('.import-label').hidden=false;$('#rst').hidden=false}
+ nav();if(n)lists();$('#v').innerHTML=!n?empty():MODE=='pet'?pet():tab=='DASH'?dash():tab=='STOK'?stok():tab=='PETA'?peta():tab=='LAP'?lap():tab=='REG'?reg():tab=='MST'?mst():tab=='ACC'?acc():tab=='LBL'?lbl():tab=='SET'?setg():stage(tab);bind();bindAuth()
+}
 function dlist(){$('#dl').innerHTML=Object.keys(S.items).map(k=>`<option value="${esc(k)}">`).join('')}
-$('#file').onchange=async e=>{const fl=e.target.files[0];if(!fl)return;if(!(await guard())){e.target.value='';return}if(S.tx.length&&!(await uiConfirm('Impor akan mengganti stok awal. Catatan transaksi tetap disimpan. Lanjutkan?')))return;
+$('#file').onchange=async e=>{const fl=e.target.files[0];if(!fl)return;if(HOSTED&&!IS_ADMIN){e.target.value='';return alert('Hanya admin yang dapat mengimpor inventory.')}if(!(await guard())){e.target.value='';return}if(S.tx.length&&!(await uiConfirm('Impor akan mengganti stok awal. Catatan transaksi tetap disimpan. Lanjutkan?')))return;
  try{const wb=XLSX.read(await fl.arrayBuffer(),{type:'array'}),ws=wb.Sheets['INVENTORY_CONTROL'];if(!ws)throw 0;
   const r=XLSX.utils.sheet_to_json(ws,{header:1,defval:null}),it={};
   for(let i=5;i<r.length;i++){const w=r[i];if(!w[0])continue;it[String(w[0]).trim()]={n:w[1]||'',g:w[2]||'',p:+w[25]||0,y:+w[26]||0}}
   if(!Object.keys(it).length)throw 0;
-  if(DB){if(!CAN)throw{code:'tidak punya hak ubah'};setSync('Mengunggah item\u2026','W');const rows=Object.entries(it).map(([k,v])=>[k,v.n,v.g,v.p,v.y]),n=Math.ceil(rows.length/800);for(let c=0;c<n;c++)await DB.doc('items/c'+c).set({m:rows.slice(c*800,(c+1)*800)});const old=await DB.collection('items').get();for(const d of old.docs)if(+d.id.slice(1)>=n)await DB.doc('items/'+d.id).delete();setSync('Data bersama, tersambung','OK')}else{S.items=it;save();dlist()}tab='DASH';render()}catch(x){if(DB)setSync('Data bersama, tersambung','OK');alert(x&&x.code?'Gagal mengunggah ke penyimpanan bersama ('+x.code+').':'File tidak dikenali. Pilih Inventory_Control_per_Item.xlsx yang memuat sheet INVENTORY_CONTROL.')}e.target.value=''};
+  if(DB){if(!CAN)throw{code:'tidak punya hak ubah'};setSync('Mengunggah item\u2026','W');const rows=Object.entries(it).map(([k,v])=>[k,v.n,v.g,v.p,v.y]),n=Math.ceil(rows.length/800);for(let c=0;c<n;c++)await DB.doc('items/c'+c).set({m:rows.slice(c*800,(c+1)*800)});const old=await DB.collection('items').get();for(const d of old.docs)if(+d.id.slice(1)>=n)await DB.doc('items/'+d.id).delete();setSync('Data bersama, tersambung','OK')}else{S.items=it;save();dlist()}tab='DASH';render()}catch(x){if(DB)setSync('Impor gagal ('+(x&&x.code||'periksa file/koneksi')+')','B');alert(x&&x.code?'Gagal mengunggah ke penyimpanan bersama ('+x.code+').':'File tidak dikenali. Pilih Inventory_Control_per_Item.xlsx yang memuat sheet INVENTORY_CONTROL.')}e.target.value=''};
 $('#exp').onclick=()=>{if(!Object.keys(S.items).length)return alert('Belum ada data untuk diunduh.');const a=agg(),wb=XLSX.utils.book_new();
  const st=Object.keys(S.items).map(k=>{const m=met(k,a),i=S.items[k];return{'Kode Barang':k,'Nama Barang':i.n,Gudang:i.g,'Saldo Rill Pcs':m.saldo[0],'Saldo Rill Yard':m.saldo[1],'Belum di Rak Pcs':m.belum[0],'Belum di Rak Yard':m.belum[1],'Terpotong Sementara Pcs':m.sem[0],'Terpotong Sementara Yard':m.sem[1],'Menunggu Checker Pcs':m.wchk[0],'Menunggu Muat Pcs':m.wmu[0],'Tersedia Pcs':m.atp[0],'Tersedia Yard':m.atp[1],Rak:rackOf(k),Status:m.st[0]}});
  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(st),'STOK');
@@ -392,7 +571,7 @@ $('#exp').onclick=()=>{if(!Object.keys(S.items).length)return alert('Belum ada d
  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(S.tx.filter(x=>x.t=='ACC').map(x=>({Tanggal:x.tgl,'No Order':x.x.ord,Status:x.x.status,'No Bukti Bayar':x.x.bukti||'',Nominal:x.x.nominal||'',Penyetuju:x.x.penyetuju||'',Catatan:x.x.cat||''}))),'PERSETUJUAN');
  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(all),'RIWAYAT');
  XLSX.writeFile(wb,'WMS_export_'+tod()+'.xlsx')};
-$('#rst').onclick=async()=>{if(!(await guard()))return;if(!(await uiConfirm('Hapus SEMUA item dan transaksi'+(DB?' untuk semua pengguna':' di browser ini')+'? Unduh Excel dulu bila perlu.')))return;try{if(DB){if(!CAN)return alert('Akun Anda tidak bisa menghapus.');for(const c of['items','master','tx','foto']){const sn=await DB.collection(c).get();for(const d of sn.docs)await DB.doc(c+'/'+d.id).delete()}}else{S={items:{},tx:[],seq:1};save();dlist();try{indexedDB.deleteDatabase('wms_foto')}catch(e){}}tab='DASH';render()}catch(er){alert('Gagal menghapus ('+(er.code||er.message)+').')}};
+$('#rst').onclick=async()=>{if(HOSTED&&!IS_ADMIN)return alert('Hanya admin yang dapat menghapus semua data.');if(!(await guard()))return;if(!(await uiConfirm('Hapus SEMUA item dan transaksi'+(DB?' untuk semua pengguna':' di browser ini')+'? Unduh Excel dulu bila perlu.')))return;try{if(DB){for(const c of['items','master','tx','foto']){const sn=await DB.collection(c).get();for(const d of sn.docs)await DB.doc(c+'/'+d.id).delete()}}else{S={items:{},tx:[],seq:1};save();dlist();try{indexedDB.deleteDatabase('wms_foto')}catch(e){}}tab='DASH';render()}catch(er){alert('Gagal menghapus ('+(er.code||er.message)+').')}};
 $('#mpet').onclick=()=>setMode('pet');
 try{if(location.hash=='#petugas'){MODE='pet';tab='HOME'}}catch(e){}
 if(typeof addEventListener!='undefined')addEventListener('hashchange',()=>{const m=location.hash=='#petugas'?'pet':'adm';if(m!=MODE){MODE=m;tab=m=='pet'?'HOME':'DASH';render()}});
